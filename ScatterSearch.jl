@@ -1,3 +1,4 @@
+using Random
 
 function loadInstance(fname)
     f=open(fname)
@@ -28,3 +29,45 @@ function loadInstance(fname)
     close(f)
     return m, n, p, r, facilities, demands
 end
+
+function generatePopulation(sizePopulation::Int, facilities::Matrix{Float32}, p::Int)
+    solutions = Array{Array{Int}}
+    numberFacilities = size(facilities,1)
+    setOfFacilities = []
+    for i in 1:numberFacilities
+        push!(setOfFacilities, i)
+    end
+
+    for i in 1:(Int)(floor(sizePopulation/2))
+        # pick a random facility
+        randFacility = rand(1:numberFacilities)
+        println("randFacility = ", randFacility)
+        solution = [randFacility]
+        # we add other facility with a metaheuristic based on GRASP
+        CL = copy(setOfFacilities) # candidate list
+        splice!(CL,randFacility)
+        RCL = [] # restricted candidate list
+        for i in 1:(p-1)
+
+        end
+    end
+    for i in (Int)(floor(sizePopulation/2))+1:sizePopulation
+
+    end
+end
+
+function main(pathToInstance::String, sizePopulation::Int)
+
+    # opening the instance
+    m, n, p, r, facilities, demands = loadInstance(pathToInstance)
+    println("m = ", m)
+    println("n = ", n)
+    println("p = ", p)
+    println("r = ", r)
+
+    # we generate our first population of solution
+    # half is good for the first objective the other is good for the second one
+    generatePopulation(sizePopulation, facilities, p)
+end
+
+main("Instances/small1.txt", 10)
