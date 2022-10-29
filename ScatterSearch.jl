@@ -1,21 +1,30 @@
 
 function loadInstance(fname)
     f=open(fname)
-    # lecture du nbre de contraintes (m) et de variables (n)
-    m, n = parse.(Int, split(readline(f)) )
-    # lecture des n coefficients de la fonction economique et cree le vecteur d'entiers c
-    C = parse.(Int, split(readline(f)) )
-    # lecture des m contraintes et reconstruction de la matrice binaire A
-    A=zeros(Int, m, n)
+    # read the parameters of the instance, here m, n, p and r
+    m, n, p, r = parse.(Int, split(readline(f)) )
+
+    # read the location of the m facilities
+    facilities=zeros(Float32, m, 2)
     for i=1:m
-        # lecture du nombre d'elements non nuls sur la contrainte i (non utilise)
-        readline(f)
-        # lecture des indices des elements non nuls sur la contrainte i
-        for valeur in split(readline(f))
-          j = parse(Int, valeur)
-          A[i,j]=1
+        values = split(readline(f))
+        for j in 1:2
+            coordinate = parse(Float32,values[j])
+            facilities[i,j]= coordinate
         end
     end
+
+    # read the location of the n demands
+    demands=zeros(Float32, n, 3)
+    for i=1:n
+        values = split(readline(f))
+        for j in 1:3
+            coordinate = parse(Float32,values[j])
+            demands[i,j]= coordinate
+        end
+    end
+
+
     close(f)
-    return C, A
+    return m, n, p, r, facilities, demands
 end
