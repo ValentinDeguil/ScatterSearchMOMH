@@ -30,19 +30,19 @@ function loadInstance(fname)
     return m, n, p, r, concentrators, terminals
 end
 
-function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32}, Q::Int, numberLevel1::Int, numberLevel2::Int, n::Int, terminals::Matrix{Float32})
+function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32}, potentials::Array{Float32}, Q::Int, numberLevel1::Int, numberLevel2::Int, n::Int, terminals::Matrix{Float32})
     # here, we'll use several occurences of GRASP to generate individuals of our population
 
     # first we'll use GRASP to select which level 1 concentrators we open
     population = Array{Array{Int}}
     numberConcentrators = numberLevel1 + numberLevel2
+    alphaC1 = 0.7
 
     # we determine how many level 1 concentrators will at least be in the solution
     minimumLevel1::Int = ceil(n/Q)
     # then we flip a coin, we add a concentrator for each head until we get a tail
     while(rand()<0.5)
         minimumLevel1 += 1
-        println("yo")
     end
     numberSelectedLevel1 = min(minimumLevel1, numberLevel1)
 
@@ -50,26 +50,51 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
     # the first one is selected randomly
     randomLevel1 = rand(1:numberLevel1)
     setOfSelectedConcentrators = [randomLevel1]
+    initialCL = []
+    for i in 1:numberLevel1
+        append!(initialCL, i)
+    end
+    CL = copy(initialCL)
+    deleteat!(CL,randomLevel1)
     # the other ones are chosen by GRASP with an alpha of 0.7
     for c1 in 2:numberSelectedLevel1
+        # we seek the best and the worst potential
+        candidate1 = CL[1]
+        potentialCandidate1 = potentials[candidate1]
+        best = potentialCandidate1
+        worst = potentialCandidate1
 
+        for i in 2:size(CL,1)
+            candidate = CL[i]
+            potentialCandidate = potentials[candidate]
+            if(potentialCandidate<best)
+                best = potentialCandidate
+            end
+            if(potentialCandidate>worst)
+                worst = potentialCandidate
+            end
+        end
+
+        threshold = worst - alphaC1*(worst-best)
+        #println("best = ", best)
+        #println("worst = ", worst)
+        #println("threshold = ", threshold)
+        RCL = []
+        for i in 1:size(CL,1)
+            candidate = CL[i]
+            if potentials[candidate] <= threshold
+                append!(RCL,candidate)
+            end
+        end
+        #println("RCL = ", RCL)
+        newConcentrator = RCL[rand(1:size(RCL,1))]
+        append!(setOfSelectedConcentrators,newConcentrator)
+        deleteat!(CL, findall(x->x==newConcentrator,CL))
+        #println("new CL = ", CL)
     end
 
-    #for i in 1:numberConcentrators
-    #    push!(setOfConcentrators, i)
-    #end
+    println("setOfSelectedConcentrators = ", setOfSelectedConcentrators)
 
-    #for i in 1:(Int)(floor(sizePopulation/2))
-    #    # pick a random facility
-    #    randConcentrator = rand(1:numberConcentrators)
-    #    println("randFacility = ", randConcentrator)
-    #    solution = [randConcentrator]
-    #    # we add other facility with a metaheuristic based on GRASP
-    #    CL = copy(setOfConcentrators) # candidate list
-    #    splice!(CL,randConcentrator)
-    #    RCL = [] # restricted candidate list
-#
-    #end
     for i in (Int)(floor(sizePopulation/2))+1:sizePopulation
 
     end
@@ -101,11 +126,11 @@ function main(pathToInstance::String, sizePopulation::Int)
     concentrators = deepcopy(newConcentrators)
 
     # we generate randomized costs for linking terminals to concentrators
-    costs = zeros(m,n)
+    linkCosts = zeros(m,n)
     for i in 1:m
         for j in 1:n
             randCost = rand(1:50)
-            costs[i,j] = randCost
+            linkCosts[i,j] = randCost
         end
     end
 
@@ -118,7 +143,16 @@ function main(pathToInstance::String, sizePopulation::Int)
         end
     end
 
-    #TODO genreate random costs between level 1 and level 2 concentrators
+    # we estimate the potential of each concentrator
+    potentials = zeros(Float32,m)
+    for i in 1:m
+        for j in 1:n
+            potentials[i] += linkCosts[i,j]
+        end
+    end
+    println(potentials)
+
+    #TODO generate random costs between level 1 and level 2 concentrators
 
     # we want to divide the set of concentrators in two levels
     # here, we have 4/5 of level 1 and 1/5 of level 2 concentrators
@@ -134,7 +168,7 @@ function main(pathToInstance::String, sizePopulation::Int)
 
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
-    generatePopulation(sizePopulation, concentrators, Q, numberLevel1, numberLevel2, n, terminals)
+    generatePopulation(sizePopulation, concentrators, potentials, Q, numberLevel1, numberLevel2, n, terminals)
 end
 
 main("Instances/verySmall1.txt", 10)
