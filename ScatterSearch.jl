@@ -96,6 +96,21 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
 
     println("setOfSelectedConcentrators = ", setOfSelectedConcentrators)
 
+    # now, we determine which links between terminals and level 1 concentrators are active
+    # the second GRASP starts with a randomly chosen link
+    randTerminal = rand(1:n)
+    randLevel1 = setOfSelectedConcentrators[rand(1:size(setOfSelectedConcentrators,1))]
+    linksTerminalLevel1 = [(randTerminal, randLevel1)]
+    println("linksTerminalLevel1 = ", linksTerminalLevel1)
+
+    remainingTerminals = []
+    for i in 1:n
+        append!(remainingTerminals, i)
+    end
+    deleteat!(remainingTerminals, randTerminal)
+    # faut faire un double for pour chercher parmis les couples nm et pas juste n
+
+
     for i in (Int)(floor(sizePopulation/2))+1:sizePopulation
 
     end
@@ -169,7 +184,7 @@ function main(pathToInstance::String, sizePopulation::Int)
 
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
-    generatePopulation(sizePopulation, concentrators, potentials, distances, Q, numberLevel1, numberLevel2, n, terminals)
+    @time generatePopulation(sizePopulation, concentrators, potentials, distances, Q, numberLevel1, numberLevel2, n, terminals)
 end
 
 main("Instances/verySmall1.txt", 10)
