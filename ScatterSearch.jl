@@ -30,7 +30,7 @@ function loadInstance(fname)
     return m, n, p, r, concentrators, terminals
 end
 
-function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32}, potentials::Array{Float32},
+function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32}, linkCosts::Matrix{Float64}, potentials::Array{Float32},
      distances::Matrix{Float32}, Q::Int, numberLevel1::Int, numberLevel2::Int, n::Int, terminals::Matrix{Float32})
     # here, we'll use several occurences of GRASP to generate individuals of our population
 
@@ -98,9 +98,13 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
 
     # now, we determine which links between terminals and level 1 concentrators are active
     # the second GRASP starts with a randomly chosen link
+    alphaLinks = 0.7
     randTerminal = rand(1:n)
     randLevel1 = setOfSelectedConcentrators[rand(1:size(setOfSelectedConcentrators,1))]
-    linksTerminalLevel1 = [(randTerminal, randLevel1)]
+    linksTerminalLevel1 = [[randLevel1, randTerminal]]
+    usedPorts = zeros(Int, size(concentrators,1))
+    usedPorts[randLevel1] += 1
+    println("usedPorts = ", usedPorts)
     println("linksTerminalLevel1 = ", linksTerminalLevel1)
 
     remainingTerminals = []
@@ -108,8 +112,60 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
         append!(remainingTerminals, i)
     end
     deleteat!(remainingTerminals, randTerminal)
-    # faut faire un double for pour chercher parmis les couples nm et pas juste n
 
+    remainingLevel1 = copy(setOfSelectedConcentrators)
+
+
+    for i in 2:n
+
+        best = linkCosts[remainingLevel1[1], remainingTerminals[1]]
+        worst = best
+
+        for i in 1:size(remainingLevel1, 1)
+            for j in 1:size(remainingTerminals, 1)
+                costCandidate = linkCosts[i,j]
+                if costCandidate < best
+                    best = costCandidate
+                end
+                if costCandidate > worst
+                    worst = costCandidate
+                end
+            end
+        end
+
+        println("best = ", best)
+        println("worst = ", worst)
+
+        threshold = worst - alphaLinks*(worst-best)
+        println("threshold = ", threshold)
+        RCL = Vector{Vector{Int}}()
+        for i in 1:size(remainingLevel1, 1)
+            for j in 1:size(remainingTerminals, 1)
+                cost = linkCosts[remainingLevel1[i],remainingTerminals[j]]
+                if cost <= threshold
+                    newCandidate = [remainingLevel1[i],remainingTerminals[j]]
+                    append!(RCL, [newCandidate])
+                end
+            end
+        end
+        println("RCL = ", RCL)
+        newLink = RCL[rand(1:size(RCL,1))]
+        println("newLink = ", newLink)
+        append!(linksTerminalLevel1,[newLink])
+        selectedLevel1 = newLink[1]
+        usedPorts[selectedLevel1] += 1
+        println("usedPorts = ", usedPorts)
+        if usedPorts[selectedLevel1] == Q
+            println("CONCENTRATEUR FULL et selectedLevels = ", selectedLevel1)
+            println(remainingLevel1)
+            deleteat!(remainingLevel1, findall(x->x==selectedLevel1,remainingLevel1))
+            println(remainingLevel1)
+        end
+        deleteat!(remainingTerminals, findall(x->x==newLink[2],remainingTerminals))
+    end
+
+    println("fin")
+    println("links = ", linksTerminalLevel1)
 
     for i in (Int)(floor(sizePopulation/2))+1:sizePopulation
 
@@ -145,7 +201,7 @@ function main(pathToInstance::String, sizePopulation::Int)
     linkCosts = zeros(m,n)
     for i in 1:m
         for j in 1:n
-            randCost = rand(1:50)
+            randCost = rand(10:50)
             linkCosts[i,j] = randCost
         end
     end
@@ -184,7 +240,7 @@ function main(pathToInstance::String, sizePopulation::Int)
 
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
-    @time generatePopulation(sizePopulation, concentrators, potentials, distances, Q, numberLevel1, numberLevel2, n, terminals)
+    @time generatePopulation(sizePopulation, concentrators, linkCosts, potentials, distances, Q, numberLevel1, numberLevel2, n, terminals)
 end
 
 main("Instances/verySmall1.txt", 10)
