@@ -30,7 +30,8 @@ function loadInstance(fname)
     return m, n, p, r, concentrators, terminals
 end
 
-function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32}, potentials::Array{Float32}, Q::Int, numberLevel1::Int, numberLevel2::Int, n::Int, terminals::Matrix{Float32})
+function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32}, potentials::Array{Float32},
+     distances::Matrix{Float32}, Q::Int, numberLevel1::Int, numberLevel2::Int, n::Int, terminals::Matrix{Float32})
     # here, we'll use several occurences of GRASP to generate individuals of our population
 
     # first we'll use GRASP to select which level 1 concentrators we open
@@ -135,22 +136,22 @@ function main(pathToInstance::String, sizePopulation::Int)
     end
 
     # we generate the distance matrix between terminals and concentrators
-    distances = zeros(m,n)
+    distances = zeros(Float32, m, n)
     for i in 1:m
         for j in 1:n
-            randDist = rand(20:70)
-            distances[i,j] = randDist
+            dist = (concentrators[i,1]-terminals[j,1])^2 + (concentrators[i,2]-terminals[j,2])^2
+            dist = dist^0.5
+            distances[i,j] = dist
         end
     end
 
     # we estimate the potential of each concentrator
-    potentials = zeros(Float32,m)
+    potentials = zeros(Float32, m)
     for i in 1:m
         for j in 1:n
             potentials[i] += linkCosts[i,j]
         end
     end
-    println(potentials)
 
     #TODO generate random costs between level 1 and level 2 concentrators
 
@@ -168,7 +169,7 @@ function main(pathToInstance::String, sizePopulation::Int)
 
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
-    generatePopulation(sizePopulation, concentrators, potentials, Q, numberLevel1, numberLevel2, n, terminals)
+    generatePopulation(sizePopulation, concentrators, potentials, distances, Q, numberLevel1, numberLevel2, n, terminals)
 end
 
 main("Instances/verySmall1.txt", 10)
