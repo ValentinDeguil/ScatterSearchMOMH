@@ -104,8 +104,7 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
     linksTerminalLevel1 = [[randLevel1, randTerminal]]
     usedPorts = zeros(Int, size(concentrators,1))
     usedPorts[randLevel1] += 1
-    println("usedPorts = ", usedPorts)
-    println("linksTerminalLevel1 = ", linksTerminalLevel1)
+    #println("linksTerminalLevel1 = ", linksTerminalLevel1)
 
     remainingTerminals = []
     for i in 1:n
@@ -115,6 +114,7 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
 
     remainingLevel1 = copy(setOfSelectedConcentrators)
 
+    RCL = Vector{Vector{Int}}()
 
     for i in 2:n
 
@@ -123,7 +123,7 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
 
         for i in 1:size(remainingLevel1, 1)
             for j in 1:size(remainingTerminals, 1)
-                costCandidate = linkCosts[i,j]
+                costCandidate = linkCosts[remainingLevel1[i],remainingTerminals[j]]
                 if costCandidate < best
                     best = costCandidate
                 end
@@ -133,12 +133,9 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
             end
         end
 
-        println("best = ", best)
-        println("worst = ", worst)
-
         threshold = worst - alphaLinks*(worst-best)
-        println("threshold = ", threshold)
-        RCL = Vector{Vector{Int}}()
+        empty!(RCL)
+
         for i in 1:size(remainingLevel1, 1)
             for j in 1:size(remainingTerminals, 1)
                 cost = linkCosts[remainingLevel1[i],remainingTerminals[j]]
@@ -148,23 +145,23 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
                 end
             end
         end
-        println("RCL = ", RCL)
+        #println("RCL après boucle = ", RCL)
+        #println("best = ", best)
+        #println("worst = ", worst)
+        #println("threshold = ", threshold)
+        for i in 1:size(RCL, 1)
+
+        end
         newLink = RCL[rand(1:size(RCL,1))]
-        println("newLink = ", newLink)
         append!(linksTerminalLevel1,[newLink])
         selectedLevel1 = newLink[1]
         usedPorts[selectedLevel1] += 1
-        println("usedPorts = ", usedPorts)
         if usedPorts[selectedLevel1] == Q
-            println("CONCENTRATEUR FULL et selectedLevels = ", selectedLevel1)
-            println(remainingLevel1)
             deleteat!(remainingLevel1, findall(x->x==selectedLevel1,remainingLevel1))
-            println(remainingLevel1)
         end
         deleteat!(remainingTerminals, findall(x->x==newLink[2],remainingTerminals))
     end
 
-    println("fin")
     println("links = ", linksTerminalLevel1)
 
     for i in (Int)(floor(sizePopulation/2))+1:sizePopulation
