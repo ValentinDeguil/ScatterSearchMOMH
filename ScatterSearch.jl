@@ -51,56 +51,42 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
     # the first one is selected randomly
     randomLevel1 = rand(1:numberLevel1)
     setOfSelectedConcentrators = [randomLevel1]
-    initialCL = []
+    initialCL = [Int[] for _=1:numberLevel1]
     for i in 1:numberLevel1
-        append!(initialCL, i)
+        initialCL[i] = [potentials[i],i]
     end
-    CL = copy(initialCL)
-    deleteat!(CL,randomLevel1)
+    deleteat!(initialCL,randomLevel1)
+    sort!(initialCL)
+
     # the other ones are chosen by GRASP with an alpha of 0.7
     for c1 in 2:numberSelectedLevel1
         # we seek the best and the worst potential
-        candidate1 = CL[1]
-        potentialCandidate1 = potentials[candidate1]
-        best = potentialCandidate1
-        worst = potentialCandidate1
-
-        for i in 2:size(CL,1)
-            candidate = CL[i]
-            potentialCandidate = potentials[candidate]
-            if(potentialCandidate<best)
-                best = potentialCandidate
-            end
-            if(potentialCandidate>worst)
-                worst = potentialCandidate
-            end
-        end
-
-        threshold = worst - alphaC1*(worst-best)
-        #println("best = ", best)
-        #println("worst = ", worst)
-        #println("threshold = ", threshold)
+        best = initialCL[1,1]
+        worst = initialCL[size(initialCL,1),1]
+        threshold = worst[1] - alphaC1*(worst[1]-best[1])
         RCL = []
-        for i in 1:size(CL,1)
-            candidate = CL[i]
-            if potentials[candidate] <= threshold
-                append!(RCL,candidate)
+
+        sizeRCL = 0
+        for i in 1:size(initialCL,1)
+
+            if initialCL[i][1] <= threshold
+                sizeRCL += 1
             end
         end
-        #println("RCL = ", RCL)
-        newConcentrator = RCL[rand(1:size(RCL,1))]
-        append!(setOfSelectedConcentrators,newConcentrator)
-        deleteat!(CL, findall(x->x==newConcentrator,CL))
-        #println("new CL = ", CL)
+        newConcentrator = rand(1:sizeRCL)
+        append!(setOfSelectedConcentrators,initialCL[newConcentrator][2])
+        deleteat!(initialCL, newConcentrator)
     end
 
     println("setOfSelectedConcentrators = ", setOfSelectedConcentrators)
+
+    println("debut debug")
 
     # now, we determine which links between terminals and level 1 concentrators are active
     # the second GRASP starts with a randomly chosen link
     alphaLinks = 0.7
     randTerminal = rand(1:n)
-    randLevel1 = setOfSelectedConcentrators[rand(1:size(setOfSelectedConcentrators,1))]
+    randLevel1 = setOfSelectedConcentrators[rand(1:numberSelectedLevel1)]
     linksTerminalLevel1 = [[randLevel1, randTerminal]]
     usedPorts = zeros(Int, size(concentrators,1))
     usedPorts[randLevel1] += 1
@@ -237,7 +223,9 @@ function main(pathToInstance::String, sizePopulation::Int)
 
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
-    @time generatePopulation(sizePopulation, concentrators, linkCosts, potentials, distances, Q, numberLevel1, numberLevel2, n, terminals)
+    @time for i in 1:1
+        generatePopulation(sizePopulation, concentrators, linkCosts, potentials, distances, Q, numberLevel1, numberLevel2, n, terminals)
+    end
 end
 
 main("Instances/verySmall1.txt", 10)
