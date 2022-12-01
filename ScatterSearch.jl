@@ -30,10 +30,11 @@ function loadInstance(fname)
     return m, n, p, r, concentrators, terminals
 end
 
-function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32}, linkCosts::Matrix{Float64}, linkConcentratorsCosts::Matrix{Float64}, potentials::Array{Float32},
-     distances::Matrix{Float32}, Q::Int, numberLevel1::Int, numberLevel2::Int, n::Int, terminals::Matrix{Float32})
+function generatePopulation(linkCosts::Matrix{Float64}, linkConcentratorsCosts::Matrix{Float64}, potentials::Array{Float32},
+     distances::Matrix{Float32}, Q::Int, numberLevel1::Int, numberLevel2::Int, n::Int)
 
-
+    valueObj1 = 0
+    valueObj2 = 0
     # here, we'll use several occurences of GRASP to generate individuals of our population
 
     # first we'll use GRASP to select which level 1 concentrators we open
@@ -86,7 +87,7 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
     randTerminal = rand(1:n)
     randLevel1 = setSelectedLevel1[rand(1:numberSelectedLevel1)]
     linksTerminalLevel1[randTerminal] = randLevel1
-    usedPorts = zeros(Int, size(concentrators,1))
+    usedPorts = zeros(Int, numberLevel1+numberLevel2)
     usedPorts[randLevel1] += 1
 
     remainingTerminals = []
@@ -149,13 +150,18 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
     alphaC2 = 0.7
     numberSelectedLevel2 = (Int)(ceil(numberSelectedLevel1/Q))
     remainingLevel2 = []
-    for i in (numberLevel1+2):numberConcentrators
+    for i in (numberLevel1+1):numberConcentrators
         append!(remainingLevel2, i)
     end
+    #println("-------")
+    #println("remainingLevel2 ", remainingLevel2, " avec ", remainingLevel2[1])
+    #println("potentials ", potentials)
 
     setSelectedLevel2 = []
 
     for i in 1:numberSelectedLevel2
+        #println("%%%")
+        #println("potentials ", potentials)
         best = potentials[remainingLevel2[1]]
         worst = best
         for j in 2:size(remainingLevel2,1)
@@ -229,9 +235,6 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
     println("selectedLevel2 = ", setSelectedLevel2)
     println("linksLevel1Level2 = ", linksLevel1Level2)
 
-    for i in (Int)(floor(sizePopulation/2))+1:sizePopulation
-
-    end
 end
 
 function main(pathToInstance::String, sizePopulation::Int)
@@ -316,8 +319,8 @@ function main(pathToInstance::String, sizePopulation::Int)
 
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
-    @time for i in 1:1
-        generatePopulation(sizePopulation, concentrators, linkCosts, linkConcentratorsCosts, potentials, distances, Q, numberLevel1, numberLevel2, n, terminals)
+    @time for i in 1:100
+        generatePopulation(linkCosts, linkConcentratorsCosts, potentials, distances, Q, numberLevel1, numberLevel2, n)
     end
 end
 
