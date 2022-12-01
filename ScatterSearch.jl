@@ -32,6 +32,8 @@ end
 
 function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32}, linkCosts::Matrix{Float64}, linkConcentratorsCosts::Matrix{Float64}, potentials::Array{Float32},
      distances::Matrix{Float32}, Q::Int, numberLevel1::Int, numberLevel2::Int, n::Int, terminals::Matrix{Float32})
+
+
     # here, we'll use several occurences of GRASP to generate individuals of our population
 
     # first we'll use GRASP to select which level 1 concentrators we open
@@ -51,7 +53,6 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
     # the first one is selected randomly
     randomLevel1 = rand(1:numberLevel1)
     setSelectedLevel1 = [randomLevel1]
-    println("setSelectedLevel1 = ", setSelectedLevel1)
     initialCL = [Int[] for _=1:numberLevel1]
     for i in 1:numberLevel1
         initialCL[i] = [potentials[i],i]
@@ -87,7 +88,6 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
     linksTerminalLevel1[randTerminal] = randLevel1
     usedPorts = zeros(Int, size(concentrators,1))
     usedPorts[randLevel1] += 1
-    #println("linksTerminalLevel1 = ", linksTerminalLevel1)
 
     remainingTerminals = []
     for i in 1:n
@@ -147,18 +147,19 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
     # the third GRASP will determine which level2 concentrator is used
 
     alphaC2 = 0.7
-    minimalNumberLevel2 = (Int)(ceil(numberSelectedLevel1/Q))
-    #println("minimalNumberLevel2 = ", minimalNumberLevel2)
-    #println("linkCostsSize = ", size(linkCosts,1), size(linkCosts,2))
-    #println("linkConcentratorsCosts = ", linkConcentratorsCosts)
-    #println("potentials = ", potentials)
+    numberSelectedLevel2 = (Int)(ceil(numberSelectedLevel1/Q))
+    remainingLevel2 = []
+    for i in (numberLevel1+2):numberConcentrators
+        append!(remainingLevel2, i)
+    end
+
     setSelectedLevel2 = []
 
-    for i in 1:minimalNumberLevel2
-        best = potentials[numberLevel1+1]
+    for i in 1:numberSelectedLevel2
+        best = potentials[remainingLevel2[1]]
         worst = best
-        for j in (numberLevel1+2):numberConcentrators
-            candidatePot = potentials[j]
+        for j in 2:size(remainingLevel2,1)
+            candidatePot = potentials[remainingLevel2[j]]
             if candidatePot < best
                 best = candidatePot
             end
@@ -168,21 +169,65 @@ function generatePopulation(sizePopulation::Int, concentrators::Matrix{Float32},
         end
         threshold = worst - alphaC2*(worst-best)
         RCL = []
-        for j in (numberLevel1+1):numberConcentrators
-            candidatePot = potentials[j]
+        for j in 1:size(remainingLevel2,1)
+            candidatePot = potentials[remainingLevel2[j]]
             if candidatePot <= threshold
                 append!(RCL,j)
             end
         end
-        newLevel2Concentrator = RCL[rand(1:(size(RCL,1)))]
+        newLevel2Concentrator = remainingLevel2[RCL[rand(1:(size(RCL,1)))]]
         append!(setSelectedLevel2,newLevel2Concentrator)
+        deleteat!(remainingLevel2, findall(x->x==newLevel2Concentrator,remainingLevel2))
     end
 
-    println("-----------res----------")
+    # forth and last GRASP to determine which links between level1 & level2 concentrators are used
+
+    alphaLinks2 = 0.7
+    linksLevel1Level2 = zeros(Int,numberSelectedLevel1)
+    remainingLevel2 = copy(setSelectedLevel2)
+    # first, we select a random link to add diversity
+    randLevel1 = rand(1:numberSelectedLevel1)
+    randLevel2 = setSelectedLevel2[rand(1:numberSelectedLevel2)]
+    linksLevel1Level2[randLevel1] = randLevel2
+    usedPorts[randLevel2] += 1
+
+    for i in 1:numberSelectedLevel1
+        if(i != randLevel1)
+            level1 = setSelectedLevel1[i]
+            best = linkConcentratorsCosts[level1, numberLevel1+1]
+            worst = best
+            for j in 1:size(remainingLevel2,1)
+                candidate = linkConcentratorsCosts[level1, remainingLevel2[j]]
+                if candidate < best
+                    best = candidate
+                end
+                if candidate > worst
+                    worst = candidate
+                end
+            end
+
+            threshold = worst - alphaLinks2*(worst-best)
+            RCL = []
+            for j in 1:size(remainingLevel2,1)
+                candidate = linkConcentratorsCosts[level1, j]
+                if (candidate <= threshold)
+                    append!(RCL, j)
+                end
+            end
+            selectedLevel2 = remainingLevel2[RCL[rand(1:size(RCL,1))]]
+            linksLevel1Level2[i] = selectedLevel2
+            usedPorts[selectedLevel2] += 1
+            if(usedPorts[selectedLevel2] >= Q)
+                deleteat!(remainingLevel2, findall(x->x==selectedLevel2,remainingLevel2))
+            end
+        end
+
+    end
 
     println("selectedLevel1 = ", setSelectedLevel1)
     println("links = ", linksTerminalLevel1)
     println("selectedLevel2 = ", setSelectedLevel2)
+    println("linksLevel1Level2 = ", linksLevel1Level2)
 
     for i in (Int)(floor(sizePopulation/2))+1:sizePopulation
 
@@ -276,4 +321,4 @@ function main(pathToInstance::String, sizePopulation::Int)
     end
 end
 
-main("Instances/verySmall1.txt", 10)
+main("Instances/small1.txt", 10)
