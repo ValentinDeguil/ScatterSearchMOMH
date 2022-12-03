@@ -1,5 +1,6 @@
 using Random
 include("generateSolutionObj1.jl")
+include("generateSolutionObj2.jl")
 
 function loadInstance(fname)
     f=open(fname)
@@ -125,9 +126,14 @@ function main(pathToInstance::String, sizePopulation::Int)
 
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
-    @time for i in 1:100
+    @time for i in 1:10
         generateSolutionObj1(1, linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
+        #generateSolutionObj2(1, linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
+    end
+    @time for i in 1:10
+        #generateSolutionObj1(1, linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
+        generateSolutionObj2(1, linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
     end
 end
 
-main("Instances/verySmall1.txt", 10)
+main("Instances/large1.txt", 10)
