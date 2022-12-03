@@ -1,6 +1,6 @@
 
-function generateSolutionObj1(obj::Int, linkCosts::Matrix{Float64}, linkConcentratorsCosts::Matrix{Float64}, potentials::Array{Float32}, distancesConcentrators::Matrix{Float32},
-    Q::Int, numberLevel1::Int, numberLevel2::Int, n::Int, costOpeningLevel1::Int64, costOpeningLevel2::Int64)
+function generateSolutionObj1(linkCosts::Matrix{Float32}, linkConcentratorsCosts::Matrix{Float32}, potentials::Array{Float32}, distancesConcentrators::Matrix{Float32},
+    Q::Int, numberLevel1::Int, numberLevel2::Int, n::Int, costOpeningLevel1, costOpeningLevel2)
 
     valueObj1 = 0
     valueObj2 = 0
@@ -17,29 +17,45 @@ function generateSolutionObj1(obj::Int, linkCosts::Matrix{Float64}, linkConcentr
     alphaC1 = 0.7
     randomLevel1 = rand(1:numberLevel1)
     setSelectedLevel1 = [randomLevel1]
-    initialCL = [Int[] for _=1:numberLevel1]
+    remainingLevel1 = []
     for i in 1:numberLevel1
-        initialCL[i] = [potentials[i],i]
+        append!(remainingLevel1, i)
     end
-    deleteat!(initialCL,randomLevel1)
-    sort!(initialCL)
+    deleteat!(remainingLevel1, randomLevel1)
 
     # the other ones are chosen by GRASP with an alpha of 0.7
     for c1 in 2:numberSelectedLevel1
         # we seek the best and the worst potential
-        best = initialCL[1,1]
-        worst = initialCL[size(initialCL,1),1]
-        threshold = worst[1] - alphaC1*(worst[1]-best[1])
+        best = potentials[remainingLevel1[1]]
+        worst = best
 
-        sizeRCL = 0
-        for i in 1:size(initialCL,1)
-            if initialCL[i][1] <= threshold
-                sizeRCL += 1
+        for i in 2:size(remainingLevel1,1)
+            pot = potentials[remainingLevel1[i]]
+            if pot < best
+                best = pot
+            end
+            if pot > worst
+                worst = pot
             end
         end
-        newConcentrator = rand(1:sizeRCL)
-        append!(setSelectedLevel1,initialCL[newConcentrator][2])
-        deleteat!(initialCL, newConcentrator)
+
+        threshold = worst - alphaC1*(worst-best)
+        #println("best = ", best)
+        #println("worst = ", worst)
+        #println("threshold = ", threshold)
+
+        RCL = []
+        for i in 1:size(remainingLevel1,1)
+            candidate = remainingLevel1[i]
+            #println("on teste si [", candidate, "] ", potentials[candidate], " <= ", threshold)
+            if potentials[candidate] <= threshold
+                append!(RCL,candidate)
+            end
+        end
+        #println("donc RCL = ", RCL)
+        newConcentrator = RCL[rand(1:size(RCL,1))]
+        append!(setSelectedLevel1,newConcentrator)
+        deleteat!(remainingLevel1, findall(x->x==newConcentrator,remainingLevel1))
     end
 
     # now, we determine which links between terminals and level 1 concentrators are active
@@ -202,7 +218,7 @@ function generateSolutionObj1(obj::Int, linkCosts::Matrix{Float64}, linkConcentr
     #println("valueObj1 = ", valueObj1)
     #println("valueObj2 = ", valueObj2)
 
-    #println((Int64)(valueObj1))
-    println((valueObj2))
+    println((valueObj1))
+    #println(valueObj2)
 
 end

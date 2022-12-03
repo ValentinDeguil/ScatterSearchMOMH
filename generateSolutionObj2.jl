@@ -15,8 +15,8 @@ function generatePotentialObj2(openConcentrators::Array{Int64}, candidateConcent
     return potential
 end
 
-function generateSolutionObj2(obj::Int, linkCosts::Matrix{Float64}, linkConcentratorsCosts::Matrix{Float64}, distancesConcentrators::Matrix{Float32},
-    Q::Int, numberLevel1::Int, numberLevel2::Int, n::Int, costOpeningLevel1::Int64, costOpeningLevel2::Int64)
+function generateSolutionObj2(linkCosts::Matrix{Float32}, linkConcentratorsCosts::Matrix{Float32}, distancesConcentrators::Matrix{Float32},
+    Q::Int, numberLevel1::Int, numberLevel2::Int, n::Int, costOpeningLevel1, costOpeningLevel2)
 
     valueObj1 = 0
     valueObj2 = 0
@@ -231,7 +231,8 @@ function generateSolutionObj2(obj::Int, linkCosts::Matrix{Float64}, linkConcentr
 
     #println("valueObj1 = ", valueObj1)
     #println("valueObj2 = ", valueObj2)
-    #println((Int64)(valueObj1))
-    println((valueObj2))
+
+    println((valueObj1))
+    #println((valueObj2))
 
 end

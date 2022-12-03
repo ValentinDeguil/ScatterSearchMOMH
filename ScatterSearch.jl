@@ -67,15 +67,6 @@ function main(pathToInstance::String, sizePopulation::Int)
     end
     concentrators = deepcopy(newConcentrators)
 
-    # we generate randomized costs for linking terminals to concentrators
-    linkCosts = zeros(m,n)
-    for i in 1:m
-        for j in 1:n
-            randCost = rand(10:50)
-            linkCosts[i,j] = randCost
-        end
-    end
-
     # we generate the distance matrix between terminals and concentrators
     distancesTerminalsConcentrators = zeros(Float32, m, n)
     for i in 1:m
@@ -83,6 +74,16 @@ function main(pathToInstance::String, sizePopulation::Int)
             dist = (concentrators[i,1]-terminals[j,1])^2 + (concentrators[i,2]-terminals[j,2])^2
             dist = dist^0.5
             distancesTerminalsConcentrators[i,j] = dist
+        end
+    end
+
+    # we generate randomized costs for linking terminals to concentrators
+    linkCosts = zeros(Float32, m,n)
+    for i in 1:m
+        for j in 1:n
+            #randCost = rand(10:50)
+            #linkCosts[i,j] = randCost
+            linkCosts[i,j] = distancesTerminalsConcentrators[i,j]
         end
     end
 
@@ -105,13 +106,14 @@ function main(pathToInstance::String, sizePopulation::Int)
     end
 
     # we generate random costs between level 1 and level 2 concentrators
-    linkConcentratorsCosts = zeros(m,m)
+    linkConcentratorsCosts = zeros(Float32, m,m)
     for i in 1:numberLevel1
         for j in (numberLevel1+1):m
             randCost = rand(10:50)
             linkConcentratorsCosts[i,j] = randCost
         end
     end
+    linkConcentratorsCosts = copy(distancesConcentrators)
 
     # we estimate the potential of each level2 concentrator
     for i in (numberLevel1+1):m
@@ -124,15 +126,23 @@ function main(pathToInstance::String, sizePopulation::Int)
     println("-----------------------------")
     println("")
 
+    C1 = 0 #100
+    C2 = 0 #200
+
+    #println("linkCosts = ", linkCosts)
+    #println("linkConcentratorsCosts = ", linkConcentratorsCosts)
+    #println("potentials = ", potentials)
+    #println("distancesConcentrators = ", distancesConcentrators)
+
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
     @time for i in 1:10
-        generateSolutionObj1(1, linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
+        generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
         #generateSolutionObj2(1, linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
     end
     @time for i in 1:10
         #generateSolutionObj1(1, linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
-        generateSolutionObj2(1, linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
+        generateSolutionObj2(linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
     end
 end
 
