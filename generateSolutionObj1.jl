@@ -80,7 +80,7 @@ function generateSolutionObj1(linkCosts::Matrix{Float32}, linkConcentratorsCosts
 
     RCL = Vector{Vector{Int}}()
 
-    for i in 2:n
+    for k in 2:n
         best = linkCosts[remainingLevel1[1], remainingTerminals[1]]
         worst = best
 
@@ -223,7 +223,7 @@ function generateSolutionObj1(linkCosts::Matrix{Float32}, linkConcentratorsCosts
     #println("valueObj1 = ", valueObj1)
     #println("valueObj2 = ", valueObj2)
 
-    #println((valueObj1))
-    println(valueObj2)
+    println((valueObj1))
+    #println(valueObj2)
 
 end
