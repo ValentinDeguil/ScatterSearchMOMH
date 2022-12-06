@@ -136,14 +136,20 @@ function main(pathToInstance::String, sizePopulation::Int)
 
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
-    @time for i in 1:10
+    @time for i in 1:16
         generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
         #generateSolutionObj2(1, linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
     end
-    @time for i in 1:10
+    @time for i in 1:16
         #generateSolutionObj1(1, linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
         generateSolutionObj2(linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
     end
+
+    # generer 24 solutions = 25 secondes
+    # generer 2*16 solutions = 33 secondes donc environ 1 sec / sol pour large1.txt
+    refSet1 = []
+    refSet2 = []
+
 end
 
 main("Instances/large1.txt", 10)
