@@ -133,14 +133,15 @@ function main(pathToInstance::String, sizePopulation::Int)
     #println("linkConcentratorsCosts = ", linkConcentratorsCosts)
     #println("potentials = ", potentials)
     #println("distancesConcentrators = ", distancesConcentrators)
+    #println("ouais coucou : ", linkConcentratorsCosts)
 
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
-    @time for i in 1:16
+    @time for i in 1:10 #16
         generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
         #generateSolutionObj2(1, linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
     end
-    @time for i in 1:16
+    @time for i in 1:10 #16
         #generateSolutionObj1(1, linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
         generateSolutionObj2(linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
     end

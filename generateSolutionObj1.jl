@@ -205,9 +205,15 @@ function generateSolutionObj1(linkCosts::Matrix{Float32}, linkConcentratorsCosts
     allConcentrators = vcat(setSelectedLevel1, setSelectedLevel2)
     nbConcentrators = numberSelectedLevel1 + numberSelectedLevel2
     for i in 1:nbConcentrators
-        min = distancesConcentrators[allConcentrators[1],allConcentrators[2]]
-        for j in 3:nbConcentrators
-            dist = distancesConcentrators[allConcentrators[1],allConcentrators[2]]
+        min = Inf
+        for j in 1:(i-1)
+            dist = distancesConcentrators[allConcentrators[i],allConcentrators[j]]
+            if dist < min
+                min = dist
+            end
+        end
+        for j in (i+1):nbConcentrators
+            dist = distancesConcentrators[allConcentrators[i],allConcentrators[j]]
             if dist < min
                 min = dist
             end
@@ -223,7 +229,7 @@ function generateSolutionObj1(linkCosts::Matrix{Float32}, linkConcentratorsCosts
     #println("valueObj1 = ", valueObj1)
     #println("valueObj2 = ", valueObj2)
 
-    println((valueObj1))
+    println((valueObj2))
     #println(valueObj2)
 
 end
