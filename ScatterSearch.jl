@@ -86,8 +86,6 @@ function main(pathToInstance::String, sizePopulation::Int)
             linkCosts[i,j] = distancesTerminalsConcentrators[i,j]
         end
     end
-    println("linkCost", linkCosts[1,2])
-    println("linkCost", linkCosts[2,1])
 
     # we generate the distance matrix between all concentrators
     distancesConcentrators = zeros(Float32, m, m)
@@ -155,4 +153,4 @@ function main(pathToInstance::String, sizePopulation::Int)
 
 end
 
-main("Instances/large2.txt", 10)
+main("Instances/large1.txt", 10)
