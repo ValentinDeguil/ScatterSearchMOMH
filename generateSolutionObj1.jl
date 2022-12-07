@@ -215,10 +215,10 @@ function generateSolutionObj1(linkCosts::Matrix{Float32}, linkConcentratorsCosts
         valueObj2 += min
     end
 
-    #println("selectedLevel1 = ", setSelectedLevel1)
-    #println("links = ", linksTerminalLevel1)
-    #println("selectedLevel2 = ", setSelectedLevel2)
-    #println("linksLevel1Level2 = ", linksLevel1Level2)
+    println("selectedLevel1 = ", setSelectedLevel1)
+    println("links = ", linksTerminalLevel1)
+    println("selectedLevel2 = ", setSelectedLevel2)
+    println("linksLevel1Level2 = ", linksLevel1Level2)
 
     #println("valueObj1 = ", valueObj1)
     #println("valueObj2 = ", valueObj2)
