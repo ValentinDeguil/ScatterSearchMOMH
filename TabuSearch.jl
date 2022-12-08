@@ -32,6 +32,8 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
         println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
         println("bestVoisin.valueObj1 = ", bestVoisin.valueObj1)
         println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
+        println("bestVoisin.linksTerminalLevel1 = ", bestVoisin.linksTerminalLevel1)
+        println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
         # Création du voisinage
 
         ############################### Swap pour les Concentrateurs de niveau 1##################################
@@ -51,12 +53,12 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
                             voisinTempSolution.valueObj1 += tempValueObj
                             println("voisinTempSolution.setSelectedLevel1 ",voisinTempSolution.setSelectedLevel1)
                             println("findfirst ",findfirst(x -> x==voisinTempSolution.setSelectedLevel1[i],voisinTempSolution.setSelectedLevel1))
-                            voisinTempSolution.setSelectedLevel1[findfirst(x -> x==voisinTempSolution.setSelectedLevel1[i],voisinTempSolution.setSelectedLevel1)] = j
                             for k in 1:length(voisinTempSolution.linksTerminalLevel1)  # Mise à jour des affectations
                                 if (voisinTempSolution.linksTerminalLevel1[k] == voisinTempSolution.setSelectedLevel1[i])
                                     voisinTempSolution.linksTerminalLevel1[k] = j
                                 end
                             end
+                            voisinTempSolution.setSelectedLevel1[findfirst(x -> x==voisinTempSolution.setSelectedLevel1[i],voisinTempSolution.setSelectedLevel1)] = j
                             voisinTempSolution.valueObj2 = calculObj2(voisinTempSolution.setSelectedLevel1,voisinTempSolution.setSelectedLevel2,distancesConcentrators)
                         end
 
@@ -67,17 +69,23 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
                         tempValueObj = calculObj2(tempSetSelectedLevel1,voisinTempSolution.setSelectedLevel2,distancesConcentrators)
                         if (voisinTempSolution.valueObj2 < tempValueObj)
                             println("test11")
+                            println("indice modif i = ",voisinTempSolution.setSelectedLevel1[i],"   j = ",j)
                             boolAmelioration = true
                             push!(listeTabou, voisinTempSolution.setSelectedLevel1[i])
                             voisinTempSolution.valueObj1 += differenceObjectif1(voisinTempSolution.setSelectedLevel1[i],j,i,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts)
                             println("test11")
                             voisinTempSolution.valueObj2 = tempValueObj
-                            voisinTempSolution.setSelectedLevel1 = tempSetSelectedLevel1
+
                             for k in 1:length(voisinTempSolution.linksTerminalLevel1)  # Mise à jour des affectations
-                                if (voisinTempSolution.linksTerminalLevel1[k] == voisinTempSolution.setSelectedLevel1[i])
+                                #println("voisinTempSolution.linksTerminalLevel1[k] ", voisinTempSolution.linksTerminalLevel1[k] )
+                                #println("voisinTempSolution.setSelectedLevel1[i] ",voisinTempSolution.setSelectedLevel1[i])
+                                if(voisinTempSolution.linksTerminalLevel1[k] == voisinTempSolution.setSelectedLevel1[i])
+                                    #println("jaj")
                                     voisinTempSolution.linksTerminalLevel1[k] = j
                                 end
                             end
+                            voisinTempSolution.setSelectedLevel1 = tempSetSelectedLevel1
+                            println("voisinTempSolution.linksTerminalLevel1",voisinTempSolution.linksTerminalLevel1)
                             println("test11")
                         end
                     end
@@ -98,16 +106,17 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
                         println("test2")
                         tempValueObj = differenceObjectif1Level2(voisinTempSolution.setSelectedLevel2[i],j,voisinTempSolution.linksLevel1Level2,linkConcentratorsCosts) #différence entre les solutions
                         if (tempValueObj<0) # Si le swap à permis une amélioration par rapport à voisinTempSolution
+                            println("indice modif i = ",voisinTempSolution.setSelectedLevel2[i],"   j = ",j)
                             #Mise A Jour des Variables
                             boolAmelioration = true
                             push!(listeTabou, voisinTempSolution.setSelectedLevel2[i])
                             voisinTempSolution.valueObj1 += tempValueObj
-                            voisinTempSolution.setSelectedLevel2[findfirst(x -> x==voisinTempSolution.setSelectedLevel2[i],voisinTempSolution.setSelectedLevel2)] = j
                             for k in 1:length(voisinTempSolution.linksLevel1Level2)  # Mise à jour des affectations
                                 if (voisinTempSolution.linksLevel1Level2[k] == voisinTempSolution.setSelectedLevel2[i])
                                     voisinTempSolution.linksLevel1Level2[k] = j
                                 end
                             end
+                            voisinTempSolution.setSelectedLevel2[findfirst(x -> x==voisinTempSolution.setSelectedLevel2[i],voisinTempSolution.setSelectedLevel2)] = j
                             voisinTempSolution.ValueObj2 = calculObj2(voisinTempSolution.setSelectedLevel1,voisinTempSolution.setSelectedLevel2,distancesConcentrators)
                         end
 
@@ -117,16 +126,17 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
                         tempSetSelectedLevel2[findfirst(x -> x==tempSetSelectedLevel2[i],tempSetSelectedLevel2)] = j
                         tempValueObj = calculObj2(voisinTempSolution.setSelectedLevel1,tempSetSelectedLevel2,distancesConcentrators)
                         if (voisinTempSolution.valueObj2 < tempValueObj)
+                            println("indice modif i = ",voisinTempSolution.setSelectedLevel2[i],"   j = ",j)
                             boolAmelioration = true
                             push!(listeTabou, i)
                             voisinTempSolution.valueObj1 += differenceObjectif1Level2(i,j,voisinTempSolution.linksLevel1Level2,linkConcentratorsCosts)
                             voisinTempSolution.valueObj2 = tempValueObj
-                            voisinTempSolution.setSelectedLevel2 = tempSetSelectedLevel2
                             for k in 1:length(voisinTempSolution.linksLevel1Level2)  # Mise à jour des affectations
-                                if (voisinTempSolution.linksLevel1Level2[k] == i)
+                                if (voisinTempSolution.linksLevel1Level2[k] == voisinTempSolution.setSelectedLevel2[i])
                                     voisinTempSolution.linksLevel1Level2[k] = j
                                 end
                             end
+                            voisinTempSolution.setSelectedLevel2 = tempSetSelectedLevel2
                         end
                     end
                 end
@@ -242,6 +252,14 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
                 end
                 i+=1
             end
+            println("bestVoisin.setSelectedLevel1 = ", bestVoisin.setSelectedLevel1)
+            println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
+            println("bestVoisin.valueObj1 = ", bestVoisin.valueObj1)
+            println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
+            println("bestVoisin.linksTerminalLevel1 = ", bestVoisin.linksTerminalLevel1)
+            println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
+
+
         end
         println("test")
 
@@ -270,19 +288,18 @@ end
 function differenceObjectif1(i,j,indiceAffectationLevel2,affectationLevel1,affectationLevel2,linkCostsTerminal,linkCostsConcentrator)
     valeur = 0.0
     listeAffectationLevel1 = findall(x -> x==i,affectationLevel1)
-    println("test12")
     for a in listeAffectationLevel1
         valeur += linkCostsTerminal[j,a] - linkCostsTerminal[i,a]
     end
-    println("test13")
-    println("i = ",i)
-    println("j = ",j)
-    println("affectationLevel1 = ",affectationLevel1)
-    println("affectationLevel2 = ",affectationLevel2)
+    #println("test13")
+    #println("i = ",i)
+    #println("j = ",j)
+    #println("affectationLevel1 = ",affectationLevel1)
+    #println("affectationLevel2 = ",affectationLevel2)
     indAffectationLevel2 = affectationLevel2[indiceAffectationLevel2]
-    println("indAffectationLevel2", indAffectationLevel2)
-    println(size(linkCostsConcentrator))
-    println("linkCostsConcentrator[j,indAffectationLevel2][1] = ", linkCostsConcentrator[j,indAffectationLevel2])
+    #println("indAffectationLevel2", indAffectationLevel2)
+    #println(size(linkCostsConcentrator))
+    #println("linkCostsConcentrator[j,indAffectationLevel2][1] = ", linkCostsConcentrator[j,indAffectationLevel2])
     temp = (linkCostsConcentrator[j,indAffectationLevel2][1] - linkCostsConcentrator[i,indAffectationLevel2][1])
     valeur = valeur + temp
     println("valeur :", valeur )
@@ -295,6 +312,7 @@ function differenceObjectif1Level2(i,j,affectation,linkCosts)
     for a in listeAffectation
         valeur += linkCosts[a,j] - linkCosts[a,i]
     end
+    println("valeur :", valeur )
     return valeur
 end
 

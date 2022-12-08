@@ -81,3 +81,11 @@ function getValueObj2(S, distancesConcentrators)
         valueObj2 += min
     end
 end
+
+function CalculCoutLink(linkCost,affectation)
+    valeur = 0.0
+    for i in 1:size(linkCost)[2]
+        valeur += linkCost[affectation[i],i]
+    end
+    return valeur
+end
