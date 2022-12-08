@@ -1,3 +1,4 @@
+include("Tools.jl")
 
 function generatePotentialObj2(openConcentrators::Array{Int64}, candidateConcentrators, distancesConcentrators::Matrix{Float32})
     numberCandidates = size(candidateConcentrators,1)
@@ -253,5 +254,7 @@ function generateSolutionObj2(linkCosts::Matrix{Float32}, linkConcentratorsCosts
 
     println((valueObj2))
     #println((valueObj2))
+    solutionReturn = solution(setSelectedLevel1,linksTerminalLevel1,setSelectedLevel2,linksLevel1Level2,valueObj1,valueObj2)
+    return solutionReturn
 
 end

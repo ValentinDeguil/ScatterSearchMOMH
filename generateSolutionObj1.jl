@@ -1,3 +1,4 @@
+include("Tools.jl")
 
 function generateSolutionObj1(linkCosts::Matrix{Float32}, linkConcentratorsCosts::Matrix{Float32}, potentials::Array{Float32}, distancesConcentrators::Matrix{Float32},
     Q::Int, numberLevel1::Int, numberLevel2::Int, n::Int, costOpeningLevel1, costOpeningLevel2)
@@ -221,15 +222,19 @@ function generateSolutionObj1(linkCosts::Matrix{Float32}, linkConcentratorsCosts
         valueObj2 += min
     end
 
-    #println("selectedLevel1 = ", setSelectedLevel1)
-    #println("links = ", linksTerminalLevel1)
-    #println("selectedLevel2 = ", setSelectedLevel2)
-    #println("linksLevel1Level2 = ", linksLevel1Level2)
+    println("costOpeningLevel1 = ", costOpeningLevel1)
+    println("costOpeningLevel2 = ", costOpeningLevel2)
+    println("selectedLevel1 = ", setSelectedLevel1)
+    println("links = ", linksTerminalLevel1)
+    println("selectedLevel2 = ", setSelectedLevel2)
+    println("linksLevel1Level2 = ", linksLevel1Level2)
 
-    #println("valueObj1 = ", valueObj1)
-    #println("valueObj2 = ", valueObj2)
+    println("valueObj1 = ", valueObj1)
+    println("valueObj2 = ", valueObj2)
 
-    println((valueObj2))
+    solutionReturn = solution(setSelectedLevel1,linksTerminalLevel1,setSelectedLevel2,linksLevel1Level2,valueObj1,valueObj2)
+    return solutionReturn
+    #println((valueObj1))
     #println(valueObj2)
 
 end

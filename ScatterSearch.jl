@@ -1,6 +1,7 @@
 using Random
 include("generateSolutionObj1.jl")
 include("generateSolutionObj2.jl")
+include("TabuSearch.jl")
 
 function loadInstance(fname)
     f=open(fname)
@@ -129,22 +130,27 @@ function main(pathToInstance::String, sizePopulation::Int)
     C1 = 0 #100
     C2 = 0 #200
 
-    #println("linkCosts = ", linkCosts)
-    #println("linkConcentratorsCosts = ", linkConcentratorsCosts)
-    #println("potentials = ", potentials)
-    #println("distancesConcentrators = ", distancesConcentrators)
-    #println("ouais coucou : ", linkConcentratorsCosts)
+
+    println("linkCosts = ", linkCosts)
+    println("linkConcentratorsCosts = ", linkConcentratorsCosts)
+    println("potentials = ", potentials)
+    println("distancesConcentrators = ", distancesConcentrators)
 
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
-    @time for i in 1:10 #16
-        generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
+    TabSolution1=[]
+    TabSolution2=[]
+
+    @time for i in 1:1 #16
+        push!(TabSolution1,generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2))
         #generateSolutionObj2(1, linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
     end
-    @time for i in 1:10 #16
+    @time for i in 1:1 #16
         #generateSolutionObj1(1, linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
-        generateSolutionObj2(linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
+        push!(TabSolution2,generateSolutionObj2(linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2))
     end
+
+    @time TabuSearch(2,TabSolution1[1] ,C1, C2, distancesConcentrators,linkConcentratorsCosts,linkCosts,numberLevel1,numberLevel2)
 
     # generer 24 solutions = 25 secondes
     # generer 2*16 solutions = 33 secondes donc environ 1 sec / sol pour large1.txt
@@ -153,4 +159,4 @@ function main(pathToInstance::String, sizePopulation::Int)
 
 end
 
-main("Instances/large1.txt", 10)
+main("Instances/large2.txt", 10)

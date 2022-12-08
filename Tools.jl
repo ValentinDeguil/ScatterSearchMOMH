@@ -1,3 +1,12 @@
+mutable struct solution
+    setSelectedLevel1::Vector{Int64}
+    linksTerminalLevel1::Vector{Int64}
+    setSelectedLevel2::Vector{Int64}
+    linksLevel1Level2::Vector{Int64}
+    valueObj1::Float64
+    valueObj2::Float64
+end
+
 
 function distanceSolutions(S1, S2)
     concentratorsS1 = vcat(S1.setSelectedLevel1,S1.setSelectedLevel2)
