@@ -86,8 +86,6 @@ function main(pathToInstance::String, sizePopulation::Int)
             linkCosts[i,j] = distancesTerminalsConcentrators[i,j]
         end
     end
-    println("linkCost", linkCosts[1,2])
-    println("linkCost", linkCosts[2,1])
 
     # we generate the distance matrix between all concentrators
     distancesConcentrators = zeros(Float32, m, m)
@@ -135,14 +133,15 @@ function main(pathToInstance::String, sizePopulation::Int)
     #println("linkConcentratorsCosts = ", linkConcentratorsCosts)
     #println("potentials = ", potentials)
     #println("distancesConcentrators = ", distancesConcentrators)
+    #println("ouais coucou : ", linkConcentratorsCosts)
 
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
-    @time for i in 1:16
+    @time for i in 1:10 #16
         generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
         #generateSolutionObj2(1, linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
     end
-    @time for i in 1:16
+    @time for i in 1:10 #16
         #generateSolutionObj1(1, linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
         generateSolutionObj2(linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
     end
@@ -154,4 +153,4 @@ function main(pathToInstance::String, sizePopulation::Int)
 
 end
 
-main("Instances/large2.txt", 10)
+main("Instances/large1.txt", 10)
