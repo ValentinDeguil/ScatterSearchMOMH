@@ -42,7 +42,7 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
                 if (!(j in voisinTempSolution.setSelectedLevel1) && !(j in listeTabou)) #Possible amélioration avec tri et Dichotomie
                     if (f == 1) # f = 1 pour objectif 1
                         println("test1")
-                        tempValueObj = differenceObjectif1(i,j,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts) #différence entre les solutions
+                        tempValueObj = differenceObjectif1(voisinTempSolution.setSelectedLevel1[i],j,i,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts) #différence entre les solutions
                         if (tempValueObj<0) # Si le swap à permis une amélioration par rapport à voisinTempSolution
                             #Mise A Jour des Variables
                             println("indice modif i = ",voisinTempSolution.setSelectedLevel1[i],"   j = ",j)
@@ -69,7 +69,7 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
                             println("test11")
                             boolAmelioration = true
                             push!(listeTabou, voisinTempSolution.setSelectedLevel1[i])
-                            voisinTempSolution.valueObj1 += differenceObjectif1(voisinTempSolution.setSelectedLevel1[i],j,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts)
+                            voisinTempSolution.valueObj1 += differenceObjectif1(voisinTempSolution.setSelectedLevel1[i],j,i,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts)
                             println("test11")
                             voisinTempSolution.valueObj2 = tempValueObj
                             voisinTempSolution.setSelectedLevel1 = tempSetSelectedLevel1
@@ -119,8 +119,8 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
                         if (voisinTempSolution.valueObj2 < tempValueObj)
                             boolAmelioration = true
                             push!(listeTabou, i)
-                            voisinTempSolution.ValueObj1 += differenceObjectif1Level2(i,j,voisinTempSolution.linksLevel1Level2,linkConcentratorsCosts)
-                            voisinTempSolution.ValueObj2 = tempValueObj
+                            voisinTempSolution.valueObj1 += differenceObjectif1Level2(i,j,voisinTempSolution.linksLevel1Level2,linkConcentratorsCosts)
+                            voisinTempSolution.valueObj2 = tempValueObj
                             voisinTempSolution.setSelectedLevel2 = tempSetSelectedLevel2
                             for k in 1:length(voisinTempSolution.linksLevel1Level2)  # Mise à jour des affectations
                                 if (voisinTempSolution.linksLevel1Level2[k] == i)
@@ -159,12 +159,11 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
                     j = numberLevel1 +1
                     nbLevel = numberLevel1 + numberLevel2
                 end
-                j = 1
                 while(j <= nbLevel && !boolAmelioration)
                     if ((j in setSelectedLevel) && !(j in listeTabou)) #Possible amélioration avec tri et Dichotomie
                         if (f == 1) # f = 1 pour objectif 1
                             if(listeTabou[i] in setSelectedLevel)
-                                tempValueObj = differenceObjectif1(j,listeTabou[i],voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts) #différence entre les solutions
+                                tempValueObj = differenceObjectif1(j,listeTabou[i],i,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts) #différence entre les solutions
                             else
                                 tempValueObj = differenceObjectif1Level2(j,listeTabou[i],links,linkConcentratorsCosts) #différence entre les solutions
                             end
@@ -202,12 +201,12 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
                             tempSetSelectedLevel = copy(setSelectedLevel)
                             deleteat!(tempSetSelectedLevel,findall(x -> x==i,tempSetSelectedLevel))
                             push!(tempSetSelectedLevel,j)
-                            tempValueObj = calculObj2(voisinTempSolution.setSelectedLevel1,tempSetSelectedLevel2,distancesConcentrators)
+                            tempValueObj = calculObj2(voisinTempSolution.setSelectedLevel1,tempSetSelectedLevel,distancesConcentrators)
                             if (voisinTempSolution.valueObj2 < tempValueObj)
                                 boolAmelioration = true
                                 deleteat!(listeTabou,findfirst(x->x==i,listeTabou))
                                 if(listeTabu[i] in setSelectedLevel1)
-                                    tempValueObj1 = differenceObjectif1(i,j,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts) #différence entre les solutions
+                                    tempValueObj1 = differenceObjectif1(j,listeTabou[i],voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts) #différence entre les solutions
                                 else
                                     tempValueObj1 = differenceObjectif1Level2(i,j,links,linkConcentratorsCosts) #différence entre les solutions
                                 end
@@ -268,7 +267,7 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
     end
 end
 
-function differenceObjectif1(i,j,affectationLevel1,affectationLevel2,linkCostsTerminal,linkCostsConcentrator)
+function differenceObjectif1(i,j,indiceAffectationLevel2,affectationLevel1,affectationLevel2,linkCostsTerminal,linkCostsConcentrator)
     valeur = 0.0
     listeAffectationLevel1 = findall(x -> x==i,affectationLevel1)
     println("test12")
@@ -280,7 +279,7 @@ function differenceObjectif1(i,j,affectationLevel1,affectationLevel2,linkCostsTe
     println("j = ",j)
     println("affectationLevel1 = ",affectationLevel1)
     println("affectationLevel2 = ",affectationLevel2)
-    indAffectationLevel2 = affectationLevel2[i]
+    indAffectationLevel2 = affectationLevel2[indiceAffectationLevel2]
     println("indAffectationLevel2", indAffectationLevel2)
     println(size(linkCostsConcentrator))
     println("linkCostsConcentrator[j,indAffectationLevel2][1] = ", linkCostsConcentrator[j,indAffectationLevel2])
@@ -308,13 +307,13 @@ function calculObj2(setSelectedLevel1,setSelectedLevel2,distancesConcentrators::
     for i in 1:nbConcentrators
         min = Inf
         for j in 1:(i-1)
-            dist = distancesConcentrators[allConcentrators[1],allConcentrators[2]]
+            dist = distancesConcentrators[allConcentrators[i],allConcentrators[j]]
             if dist < min
                 min = dist
             end
         end
         for j in (i+1):nbConcentrators
-            dist = distancesConcentrators[allConcentrators[1],allConcentrators[2]]
+            dist = distancesConcentrators[allConcentrators[i],allConcentrators[j]]
             if dist < min
                 min = dist
             end
