@@ -1,6 +1,6 @@
 include("Tools.jl")
 
-function PathRelinking(initialingSol, guidingSol, n, linkCosts, linkConcentratorsCosts, distancesConcentrators)
+function PathRelinking(initialingSol, guidingSol, n, Q, linkCosts, linkConcentratorsCosts, distancesConcentrators)
 
     newSols = []
     numberLevel1 = length(initialingSol.setSelectedLevel1)
@@ -50,6 +50,8 @@ function PathRelinking(initialingSol, guidingSol, n, linkCosts, linkConcentrator
         usedPorts[randOut] = randIn
         usedPorts[randIn] = temp
         currentSol.valueObj1 += deltaObj1
+        obj2 = getValueObj2(currentSol, distancesConcentrators)
+        currentSol.valueObj2 = obj2
         append!(newSols, currentSol)
     end
 
@@ -78,7 +80,7 @@ function PathRelinking(initialingSol, guidingSol, n, linkCosts, linkConcentrator
         end
         # then we transfer the terminals linked to the randOut level 1 to the randIn level 1
         deltaObj1 = 0
-        for i in 1:length(currentSol.setSelectedLevel1)
+        for i in 1:length(currentSol.linksTerminalLevel1)
             if currentSol.setSelectedLevel1[i] == randOut
                 deltaObj1 -= linkConcentratorsCosts[randOut,i]
                 deltaObj1 += linkConcentratorsCosts[randIn,i]
@@ -89,27 +91,59 @@ function PathRelinking(initialingSol, guidingSol, n, linkCosts, linkConcentrator
         usedPorts[randOut] = randIn
         usedPorts[randIn] = temp
         currentSol.valueObj1 += deltaObj1
+        obj2 = getValueObj2(currentSol, distancesConcentrators)
+        currentSol.valueObj2 = obj2
         append!(newSols, currentSol)
     end
 
     # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
 
-
-
     # now, we want the same links between terminals and level 1 in the initiating and the guiding
     # we add a number of update before we return a new solution, otherwise, we have too much solutions to compute and improve
-    stop = 0
-    max = 10
+    nbModif = 0
+    maxModif = 10
     for i in 1:n
-        # if a terminal is not correctly linked
-        level1 = currentSol.linksTerminalLevel1[i]
-        if level1 != currentSol.linksTerminalLevel1[j]
-            # we look for another free place or we swap two links
-            found = false
-            j = 1
-            while !found && j <= n
-                if()
+        linkCurrent = currentSol.linksTerminalLevel1[i]
+        linkGuiding = guidingSol.linksTerminalLevel1[i]
+        # if a terminal is well linked, we do nothing
+        if(linkCurrent != linkGuiding)
+            # if the terminal can just be moved, we do this
+            if usedPorts[linkGuiding] < Q
+                currentSol.linksTerminalLevel1[i]
+                deltaObj1 = -linkConcentratorsCosts[linkCurrent, i]
+                deltaObj1 += linkConcentratorsCosts[linkGuiding, i]
+                currentSol.valueObj1 += deltaObj1
+                usedPorts[linkGuiding] += 1
+                usedPorts[linkCurrent] -= 1
+                nbModif += 1
+            else
+                j = i+1
+                found = false
+                # we look for another bad linked terminal
+                while !found && j <= n
+                    testLinkCurrent = currentSol.linksTerminalLevel1[j]
+                    if(testLinkCurrent == linkGuiding && guidingSol.linksTerminalLevel1[j] != linkGuiding)
+                        # we invert them
+                        found = true
+                        deltaObj1 = -linkConcentratorsCosts[linkCurrent, i]
+                        deltaObj1 -= linkConcentratorsCosts[testLinkCurrent, j]
+                        deltaObj1 += linkConcentratorsCosts[linkGuiding, i]
+                        deltaObj1 += linkConcentratorsCosts[linkCurrent, j]
+                        currentSol.valueObj1 += deltaObj1
+                        currentSol.linksTerminalLevel1[i] == testLinkCurrent
+                        currentSol.linksTerminalLevel1[i] == testLinkCurrent
+                        nbModif += 1
+                    else
+                        # we look for another one bad linked terminal
+                        j += 1
+                    end
+                end
             end
+        end
+
+        if nbModif == maxModif
+            append!(newSols, currentSol)
+            nbModif = 0
         end
     end
 
