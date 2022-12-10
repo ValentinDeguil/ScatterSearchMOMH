@@ -5,6 +5,7 @@ mutable struct solution
     linksLevel1Level2::Vector{Int64}
     valueObj1::Float64
     valueObj2::Float64
+    index
 end
 
 
