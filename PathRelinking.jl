@@ -114,7 +114,7 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
         currentSol.valueObj1 += deltaObj1
         obj2 = getValueObj2(currentSol, distancesConcentrators)
         currentSol.valueObj2 = obj2
-        push!(newSols, solution(copy(currentSol.setSelectedLevel1), copy(currentSol.linksTerminalLevel1), copy(currentSol.setSelectedLevel2), copy(currentSol.linksLevel1Level2), currentSol.valueObj1, currentSol.valueObj2))
+        push!(newSols, solution(copy(currentSol.setSelectedLevel1), copy(currentSol.linksTerminalLevel1), copy(currentSol.setSelectedLevel2), copy(currentSol.linksLevel1Level2), currentSol.valueObj1, currentSol.valueObj2, currentSol.index))
     end
 
     # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
@@ -188,7 +188,7 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
             #println("val Obj1 = ", currentSol.valueObj1)
             #println("val Obj2 = ", currentSol.valueObj2)
             #println("")
-            push!(newSols, solution(copy(currentSol.setSelectedLevel1), copy(currentSol.linksTerminalLevel1), copy(currentSol.setSelectedLevel2), copy(currentSol.linksLevel1Level2), currentSol.valueObj1, currentSol.valueObj2))
+            push!(newSols, solution(copy(currentSol.setSelectedLevel1), copy(currentSol.linksTerminalLevel1), copy(currentSol.setSelectedLevel2), copy(currentSol.linksLevel1Level2), currentSol.valueObj1, currentSol.valueObj2, currentSol.index))
             nbModif = 0
         end
     end
