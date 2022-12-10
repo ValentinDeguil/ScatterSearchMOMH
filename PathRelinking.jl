@@ -101,8 +101,8 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
         deltaObj1 = 0
         for i in 1:length(currentSol.linksLevel1Level2)
             if currentSol.linksLevel1Level2[i] == randOut
-                deltaObj1 -= linkConcentratorsCosts[randOut,i]
-                deltaObj1 += linkConcentratorsCosts[randIn,i]
+                deltaObj1 -= linkConcentratorsCosts[randOut,current.setSelectedLevel1[i]]
+                deltaObj1 += linkConcentratorsCosts[randIn,current.setSelectedLevel1[i]]
                 currentSol.linksLevel1Level2[i] = randIn
             end
         end
