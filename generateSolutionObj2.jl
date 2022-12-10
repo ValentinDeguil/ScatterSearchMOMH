@@ -252,8 +252,8 @@ function generateSolutionObj2(linkCosts::Matrix{Float32}, linkConcentratorsCosts
     #println("valueObj1 = ", valueObj1)
     #println("valueObj2 = ", valueObj2)
 
-    println((valueObj2))
-    #println((valueObj2))
+    println("valueObj1 = ", valueObj1)
+    println("valueObj2 = ", valueObj2)
     solutionReturn = solution(setSelectedLevel1,linksTerminalLevel1,setSelectedLevel2,linksLevel1Level2,valueObj1,valueObj2)
     return solutionReturn
 

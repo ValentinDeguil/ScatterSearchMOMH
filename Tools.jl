@@ -72,7 +72,8 @@ end
 
 function getValueObj2(S, distancesConcentrators)
     allConcentrators = vcat(S.setSelectedLevel1, S.setSelectedLevel2)
-    nbConcentrators = numberSelectedLevel1 + numberSelectedLevel2
+    nbConcentrators = length(allConcentrators)
+    valueObj2 = 0
     for i in 1:nbConcentrators
         min = Inf
         for j in 1:(i-1)
@@ -89,6 +90,7 @@ function getValueObj2(S, distancesConcentrators)
         end
         valueObj2 += min
     end
+    return valueObj2
 end
 
 function CalculCoutLink(linkCost,affectation)
