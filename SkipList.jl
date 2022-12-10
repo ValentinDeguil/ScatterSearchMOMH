@@ -178,7 +178,7 @@ function affichageSkiplist(head::point)
             affichage = affichage * "------"
             affichage = affichage * string(tempEst.valeur)
         end
-        println(affichage)
+        #println(affichage)
     end
 
 end
@@ -203,6 +203,7 @@ function SetOfSolution(head::point)::Vector{Vector{Float64}}
        temp = temp.sud
    end
    while (temp.est != nothing)
+       temp = temp.est
        push!(setSol,test.values)
    end
    deleteat!(setSol,length(setSol))
