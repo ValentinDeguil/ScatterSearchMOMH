@@ -141,18 +141,26 @@ function main(pathToInstance::String, sizePopulation::Int)
     # half is good for the first objective the other is good for the second one
     solutionsGRASP=[]
     iterationGRASP = 16
+    globalIndex::Int64 = 1
 
     @time for i in 1:iterationGRASP
         baseSolution = generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
-        println("coucou 1 ", baseSolution.linksTerminalLevel1)
+        #println("coucou 1 ", baseSolution.linksTerminalLevel1)
         improvedSolution = TabuSearch(1, baseSolution, distancesConcentrators, linkConcentratorsCosts, linkCosts, numberLevel1, numberLevel2)
-        println("coucou 1 ", improvedSolution.linksTerminalLevel1)
+        improvedSolution.index = globalIndex
+        globalIndex += 1
+        #println("coucou 1 ", improvedSolution.linksTerminalLevel1)
         push!(solutionsGRASP, improvedSolution)
         #generateSolutionObj2(1, linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
     end
     @time for i in 1:iterationGRASP
-        #generateSolutionObj1(1, linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
-        push!(solutionsGRASP,generateSolutionObj2(linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2))
+        baseSolution = generateSolutionObj2(linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
+        println("coucou 1 ", baseSolution.linksTerminalLevel1)
+        improvedSolution = TabuSearch(2, baseSolution, distancesConcentrators, linkConcentratorsCosts, linkCosts, numberLevel1, numberLevel2)
+        improvedSolution.index = globalIndex
+        globalIndex += 1
+        println("coucou 1 ", improvedSolution.linksTerminalLevel1)
+        push!(solutionsGRASP, improvedSolution)
     end
 
     #@time PathRelinking(TabSolution1[1], TabSolution2[1], n, m, Q, linkCosts, linkConcentratorsCosts, distancesConcentrators)
@@ -163,13 +171,6 @@ function main(pathToInstance::String, sizePopulation::Int)
     refSet1 = []
     refSet2 = []
     beta = 8
-    #for i in 1:32
-    #    println(solutionsGRASP[i].valueObj1)
-    #end
-    #println("")
-    #for i in 1:32
-    #    println(solutionsGRASP[i].valueObj2)
-    #end
 
     # first, we add the best beta/2 solutions for each objective of respective refsets
     for i in 1:beta/2
@@ -233,10 +234,53 @@ function main(pathToInstance::String, sizePopulation::Int)
         deleteat!(solutionsGRASP, indexMaxDist)
     end
 
+    # here, we try to update refsets if a new sol is improving
+    stop = false
+    while !stop
+        stop = true
+        # here, we process the pathrelinking between all new pairs from refset1 and refset2
+        poolSolutions = []
+        forbiddenPairs = []
+        for i in 1:beta
+            for j in 1:beta
+                S1 = refSet1[i]
+                S2 = refSet2[j]
+                indexS1 = S1.index
+                indexS2 = S2.index
+                pair = [min(indexS1, indexS2), max(indexS1, indexS2)]
+                if !(pair in forbiddenPairs)
+                    newSols = PathRelinking(S1, S2, n, m, Q, linkCosts, linkConcentratorsCosts, distancesConcentrators)
+                    for sol in 1:newSols
+                        improvedSolution1 = TabuSearch(1, newSols[1], distancesConcentrators, linkConcentratorsCosts, linkCosts, numberLevel1, numberLevel2)
+                        improvedSolution2 = TabuSearch(2, newSols[1], distancesConcentrators, linkConcentratorsCosts, linkCosts, numberLevel1, numberLevel2)
+                        improvedSolution1.index = globalIndex
+                        improvedSolution2.index = (globalIndex + 1)
+                        globalIndex += 2
+                        push!(poolSolutions, improvedSolution1)
+                        push!(poolSolutions, improvedSolution2)
+                    end
+                    push!(forbiddenPairs,pair)
+                end
+            end
+        end
+        # we check if we have a dominated solution inside the refset 1
+        for i in 1:length(poolSolutions)
+            dominatedSols = []
+            for j in 1:beta
+                if(poolSolution[i].valueObj1 < refSet1[j].valueObj1)
+                    push!(dominatedSols,j)
+                end
+            end
+            if length(dominatedSols) > 0
+
+            end
+        end
+    end
+
     #for i in 1:beta
     #    println(refSet2[i].valueObj2)
     #end
 
 end
 
-main("Instances/small1.txt", 10)
+main("Instances/verySmall1.txt", 10)
