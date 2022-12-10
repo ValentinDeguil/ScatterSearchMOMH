@@ -40,7 +40,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
 
 
         tabVoisinNonSelectionneLvl1::Vector{Int64} = [i for i in 1:numberLevel1]
-        tabVoisinNonSelectionneLvl2::Vector{Int64} = [i for i in numberLevel1:numberLevel1+numberLevel2]
+        tabVoisinNonSelectionneLvl2::Vector{Int64} = [i for i in numberLevel1+1:numberLevel1+numberLevel2]
         tabVoisinNonSelectionneLvl1 = setdiff(tabVoisinNonSelectionneLvl1,voisinTempSolution.setSelectedLevel1)
         tabVoisinNonSelectionneLvl2 = setdiff(tabVoisinNonSelectionneLvl2,voisinTempSolution.setSelectedLevel2)
         tabVoisinNonSelectionneLvl1 = setdiff(tabVoisinNonSelectionneLvl1,listeTabou)
@@ -164,7 +164,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
             print("time aspiration  : ")
             @time while(i <= length(listeTabou) && !boolAmelioration)
                 #println("Boucle swap aspiration")
-                if(listeTabou[i] in voisinTempSolution.setSelectedLevel1)
+                if(listeTabou[i] <= numberLevel1)
                     setSelectedLevel = voisinTempSolution.setSelectedLevel1
                     bestTempSetSelectedLevel = bestVoisinTemp.setSelectedLevel1
                     links = voisinTempSolution.linksTerminalLevel1
@@ -182,13 +182,14 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
                 while(j <= nbLevel && !boolAmelioration)
                     if ((j in setSelectedLevel) && !(j in listeTabou)) #Possible amélioration avec tri et Dichotomie
                         if (f == 1) # f = 1 pour objectif 1
-                            if(listeTabou[i] in setSelectedLevel)
+                            if(listeTabou[i] <= numberLevel1)
                                 tempValueObj = differenceObjectif1(j,listeTabou[i],i,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts) #différence entre les solutions
                             else
                                 tempValueObj = differenceObjectif1Level2(j,listeTabou[i],links,linkConcentratorsCosts) #différence entre les solutions
                             end
                             if (tempValueObj < bestVoisin.valueObj1) # Si le swap à permis une amélioration par rapport à voisinTempSolution
                                 #Mise A Jour des Variables
+                                print("test---------------")
                                 boolAmelioration = true
                                 voisinTempSolution.valueObj1 += tempValueObj
                                 #println("listeTabou ", listeTabou)
@@ -200,6 +201,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
                                     end
                                 end
                                 deleteat!(listeTabou,i)
+                                push!(listeTabou,j)
                                 voisinTempSolution.valueObj2 = calculObj2(voisinTempSolution.setSelectedLevel1,voisinTempSolution.setSelectedLevel2,distancesConcentrators)
 
 
@@ -223,6 +225,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
                             push!(tempSetSelectedLevel,j)
                             tempValueObj = calculObj2(voisinTempSolution.setSelectedLevel1,tempSetSelectedLevel,distancesConcentrators)
                             if (voisinTempSolution.valueObj2 < tempValueObj)
+                                print("test2---------------")
                                 boolAmelioration = true
                                 deleteat!(listeTabou,findfirst(x->x==i,listeTabou))
                                 if(listeTabu[i] in setSelectedLevel1)
@@ -238,10 +241,12 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
                                         links[k] = j
                                     end
                                 end
+                                deleteat!(listeTabou,i)
+                                push!(listeTabou,j)
 
                             elseif (tempValueObj > bestVoisinTemp.valueObj2)
 
-                                if(listeTabu[i] in setSelectedLevel1)
+                                if(listeTabu[i] <= setSelectedLevel1)
                                     tempValueObj1 = differenceObjectif1(i,j,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts) #différence entre les solutions
                                 else
                                     tempValueObj1 = differenceObjectif1Level2(i,j,links,linkConcentratorsCosts) #différence entre les solutions
@@ -262,12 +267,13 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
                 end
                 i+=1
             end
-            #println("bestVoisin.setSelectedLevel1 = ", bestVoisin.setSelectedLevel1)
-            #println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
-            #println("bestVoisin.valueObj1 = ", bestVoisin.valueObj1)
-            #println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
-            #println("bestVoisin.linksTerminalLevel1 = ", bestVoisin.linksTerminalLevel1)
-            #println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
+            println("listeTabou = ",listeTabou)
+            println("bestVoisin.setSelectedLevel1 = ", bestVoisin.setSelectedLevel1)
+            println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
+            println("bestVoisin.valueObj1 = ", bestVoisin.valueObj1)
+            println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
+            println("bestVoisin.linksTerminalLevel1 = ", bestVoisin.linksTerminalLevel1)
+            println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
 
 
         end
@@ -296,6 +302,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
         if(length(listeTabou)>=7)
             deleteat!(listeTabou,1)
         end
+        println("qehtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
     end
     iter+=1
 
