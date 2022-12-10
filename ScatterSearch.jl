@@ -163,7 +163,7 @@ function main(pathToInstance::String, sizePopulation::Int)
         println("coucou 1 ", improvedSolution.linksTerminalLevel1)
         push!(solutionsGRASP, improvedSolution)
     end
-
+    sleep(100000)
     #@time PathRelinking(TabSolution1[1], TabSolution2[1], n, m, Q, linkCosts, linkConcentratorsCosts, distancesConcentrators)
 
     #@time TabuSearch(2,TabSolution1[1] ,C1, C2, distancesConcentrators,linkConcentratorsCosts,linkCosts,numberLevel1,numberLevel2)

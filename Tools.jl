@@ -94,10 +94,17 @@ function getValueObj2(S, distancesConcentrators)
     return valueObj2
 end
 
-function CalculCoutLink(linkCost,affectation)
+function CalculCoutLink(linkCosts,affectation)
     valeur = 0.0
-    for i in 1:size(linkCost)[2]
-        valeur += linkCost[affectation[i],i]
+    for i in 1:size(linkCosts)[2]
+        valeur += linkCosts[affectation[i],i]
+    end
+    return valeur
+end
+function CalculCoutLinkConcentrators(linkCosts,setSelectedLevel1,linksLevel1Level2)
+    valeur = 0.0
+    for i in 1:length(setSelectedLevel1)
+        valeur += linkCosts[setSelectedLevel1[i],linksLevel1Level2[i]]
     end
     return valeur
 end

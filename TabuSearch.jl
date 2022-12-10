@@ -9,8 +9,9 @@ include("Tools.jl")
 
 function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float32},linkConcentratorsCosts::Matrix{Float32},linkCosts::Matrix{Float32},numberLevel1::Int64, numberLevel2::Int64)
     #println("Début Tabou")
-    println("----------------------------------------------------------")
-    println("----------------------------------------------------------")
+    #println("----------------------------------------------------------")
+    #println("----------------------------------------------------------")
+    #println("-------------------Début----------------------------")
 
     nbrIteration::Int32 = 5
     listeTabou::Vector{Int64} = []
@@ -25,6 +26,9 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
     #println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
     #println("bestVoisin.linksTerminalLevel1 = ", bestVoisin.linksTerminalLevel1)
     #println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
+#
+    #println("----------------------------------------------------------")
+    #println("----------------------------------------------------------")
 
     while iter < nbrIteration
         boolAmelioration::Bool = false #booleen vrai si le voisin améliore la solution faux sinon
@@ -49,8 +53,8 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
 
         ############################### Swap pour les Concentrateurs de niveau 1##################################
         i=1
-        print("time lvl1  : ")
-        @time while (i <= length(voisinTempSolution.setSelectedLevel1) && !boolAmelioration)
+        #print("time lvl1  : ")
+        while (i <= length(voisinTempSolution.setSelectedLevel1) && !boolAmelioration)
             #println("Boucle swap 1")
             j = 1
             while (j <= length(tabVoisinNonSelectionneLvl1) && !boolAmelioration)
@@ -72,6 +76,10 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
                         end
                         voisinTempSolution.setSelectedLevel1[findfirst(x -> x==voisinTempSolution.setSelectedLevel1[i],voisinTempSolution.setSelectedLevel1)] = tabVoisinNonSelectionneLvl1[j]
                         voisinTempSolution.valueObj2 = calculObj2(voisinTempSolution.setSelectedLevel1,voisinTempSolution.setSelectedLevel2,distancesConcentrators)
+                        #println(" ")
+                        #println("valeur obj : ",voisinTempSolution.valueObj1 += tempValueObj)
+                        #println("calcul obj : ",CalculCoutLink(linkCosts,voisinTempSolution.linksTerminalLevel1))
+
                     end
                 else # f = 2 pour objectif 2
                     #println("test1")
@@ -97,6 +105,9 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
                         voisinTempSolution.setSelectedLevel1 = tempSetSelectedLevel1
                         #println("voisinTempSolution.linksTerminalLevel1",voisinTempSolution.linksTerminalLevel1)
                         #println("test11")
+                        #println(" ")
+                        #println("valeur obj : ",voisinTempSolution.valueObj1 += tempValueObj)
+                        #println("calcul obj : ",CalculCoutLink(linkCosts,voisinTempSolution.linksTerminalLevel1))
                     end
                 end
                 j+=1
@@ -107,8 +118,8 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
 
         ############################### Swap pour les Concentrateurs de niveau 2##################################
         i=1
-        print("time lvl2  : ")
-        @time while(i <= length(voisinTempSolution.setSelectedLevel2) && !boolAmelioration)
+        #print("time lvl2  : ")
+        while(i <= length(voisinTempSolution.setSelectedLevel2) && !boolAmelioration)
             #println("Boucle swap 2")
             j = 1
             while(j <= length(tabVoisinNonSelectionneLvl2) && !boolAmelioration)
@@ -138,7 +149,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
                         #println("indice modif i = ",voisinTempSolution.setSelectedLevel2[i],"   j = ",j)
                         boolAmelioration = true
                         push!(listeTabou, i)
-                        voisinTempSolution.valueObj1 += differenceObjectif1Level2(i,j,voisinTempSolution.linksLevel1Level2,linkConcentratorsCosts)
+                        voisinTempSolution.valueObj1 += differenceObjectif1Level2(voisinTempSolution.setSelectedLevel2[i],tabVoisinNonSelectionneLvl2[j],voisinTempSolution.linksLevel1Level2,linkConcentratorsCosts)
                         voisinTempSolution.valueObj2 = tempValueObj
                         for k in 1:length(voisinTempSolution.linksLevel1Level2)  # Mise à jour des affectations
                             if (voisinTempSolution.linksLevel1Level2[k] == voisinTempSolution.setSelectedLevel2[i])
@@ -281,7 +292,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
 
         # Si il y a une amélioration de la solution courante on regarde si cette solution est meilleur que la meilleur solution trouver jusqu'a maintenant
         if boolAmelioration
-            println("Amelioration")
+            #println("Amelioration")
             if f == 1
                 if(voisinTempSolution.valueObj1 < bestVoisin.valueObj1)
                     bestVoisin = deepcopy(voisinTempSolution)
@@ -304,23 +315,21 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
     #        deleteat!(listeTabou,1)
     #    end
     iter+=1
-    println("qehtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
+    #println("qehtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt")
     end
-
-
-    println("")
-    println("Iteration : ",iter)
-    println("")
-    #println("-----------------------------------------------")
+    #println("----------------------------------------------------------")
+    #println("----------------------------------------------------------")
+    #println("-------------------Fin----------------------------")
     #println("bestVoisin.setSelectedLevel1 = ", bestVoisin.setSelectedLevel1)
     #println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
-    #println("bestVoisin.valueObj1 = ", bestVoisin.valueObj1)
-    #println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
     #println("bestVoisin.linksTerminalLevel1 = ", bestVoisin.linksTerminalLevel1)
     #println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
-    println("renvoi Solution")
+    #println("bestVoisin.valueObj1 = ", bestVoisin.valueObj1)
+    #println("calcul obj1 : ",CalculCoutLink(linkCosts,bestVoisin.linksTerminalLevel1)+CalculCoutLinkConcentrators(linkConcentratorsCosts,bestVoisin.setSelectedLevel1,bestVoisin.linksLevel1Level2))
+    #println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
     return bestVoisin
 end
+#differenceObjectif1(voisinTempSolution.setSelectedLevel1[i],tabVoisinNonSelectionneLvl1[j],i,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts)
 
 function differenceObjectif1(i,j,indiceAffectationLevel2,affectationLevel1,affectationLevel2,linkCostsTerminal,linkCostsConcentrator)
     valeur::Float64 = 0.0
@@ -336,8 +345,9 @@ function differenceObjectif1(i,j,indiceAffectationLevel2,affectationLevel1,affec
     indAffectationLevel2 = affectationLevel2[indiceAffectationLevel2]
     #println("indAffectationLevel2", indAffectationLevel2)
     #println(size(linkCostsConcentrator))
-    #println("linkCostsConcentrator[j,indAffectationLevel2][1] = ", linkCostsConcentrator[j,indAffectationLevel2])
-    temp = (linkCostsConcentrator[j,indAffectationLevel2][1] - linkCostsConcentrator[i,indAffectationLevel2][1])
+    #println(linkCostsConcentrator)
+    #println("linkCostsConcentrator[j,indAffectationLevel2][1] = ", linkCostsConcentrator[j,indAffectationLevel2][1])
+    temp = (linkCostsConcentrator[j,indAffectationLevel2] - linkCostsConcentrator[i,indAffectationLevel2])
     valeur = valeur + temp
     #println("valeur :", valeur )
     return valeur
@@ -395,7 +405,7 @@ end
 #numberLevel1 = 8
 #numberLevel2 = 2
 #sol = solution(selectedLevel1,links,selectedLevel2,linksLevel1Level2,valueObj1,valueObj2,nothing)
-#@time TabuSearch(2,sol::solution, distancesConcentrators,linkConcentratorsCosts,linkCosts,numberLevel1,numberLevel2)
+#@time TabuSearch(1,sol::solution, distancesConcentrators,linkConcentratorsCosts,linkCosts,numberLevel1,numberLevel2)
 
 
 
