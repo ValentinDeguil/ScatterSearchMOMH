@@ -61,13 +61,13 @@ function main(pathToInstance::String, sizePopulation::Int)
     Q = 7
 
     # here, we shuffle concentrators to avoid bias during the picking
-    tempArray = Array{Int}(1:m)
-    shuffle!(tempArray)
-    newConcentrators = zeros(Float32, m, 2)
-    for i in 1:m
-        newConcentrators[i,1:2] = concentrators[tempArray[i],1:2]
-    end
-    concentrators = deepcopy(newConcentrators)
+    #######tempArray = Array{Int}(1:m)
+    #######shuffle!(tempArray)
+    #######newConcentrators = zeros(Float32, m, 2)
+    #######for i in 1:m
+    #######    newConcentrators[i,1:2] = concentrators[tempArray[i],1:2]
+    #######end
+    #######concentrators = deepcopy(newConcentrators)
 
     # we generate the distance matrix between terminals and concentrators
     distancesTerminalsConcentrators = zeros(Float32, m, n)
@@ -246,19 +246,27 @@ function main(pathToInstance::String, sizePopulation::Int)
     while !stop
         println("jaj")
         stop = true
+        poolSolutions = []
         # here, we process the pathrelinking between all new pairs from refset1 and refset2
-        for i in 1:beta
-            for j in 1:beta
-                S1 = refSet1[i]
-                S2 = refSet2[j]
+        for a in 1:beta
+            for b in 1:beta
+                println("----------------")
+                println("a = ", a)
+                println("b = ", b)
+                println("----------------")
+                S1 = refSet1[a]
+                S2 = refSet2[b]
                 indexS1 = S1.index
                 indexS2 = S2.index
-                println("indexS1", indexS1)
-                println("indexS1", indexS2)
+                println("indexS1 = ", indexS1)
+                println("indexS2 = ", indexS2)
                 pair = [min(indexS1, indexS2), max(indexS1, indexS2)]
+                println("oui = ", pair)
                 if !(pair in forbiddenPairs)
+                    println("paire inédite")
                     newSols = PathRelinking(S1, S2, n, m, Q, linkCosts, linkConcentratorsCosts, distancesConcentrators)
-                    for sol in 1:newSols
+                    println("sizenewSols = ", length(newSols))
+                    for sol in 1:length(newSols)
                         improvedSolution1 = TabuSearch(1, newSols[1], distancesConcentrators, linkConcentratorsCosts, linkCosts, numberLevel1, numberLevel2)
                         improvedSolution2 = TabuSearch(2, newSols[1], distancesConcentrators, linkConcentratorsCosts, linkCosts, numberLevel1, numberLevel2)
                         improvedSolution1.index = globalIndex
@@ -293,25 +301,42 @@ function main(pathToInstance::String, sizePopulation::Int)
 
         # we check if we have a dominated solution inside the refset 1
         for i in 1:length(poolSolutions)
-            candidateSolution = poolSolution[i]
+            println("dominated ?")
+            candidateSolution = poolSolutions[i]
+
+            println("candidat")
+            println("selectedLevel1 = ", candidateSolution.setSelectedLevel1)
+            println("links = ", candidateSolution.linksTerminalLevel1)
+            println("selectedLevel2 = ", candidateSolution.setSelectedLevel2)
+            println("linksLevel1Level2 = ", candidateSolution.linksLevel1Level2)
+            testcout = CalculCoutLink(linkCosts,candidateSolution.linksTerminalLevel1)
+            println("testcout = ", testcout)
+
+            candidateValueObj1 = candidateSolution.valueObj1
+            println("candidateValueObj1 = ", candidateValueObj1)
+            #temp
+            for jaj in 1:beta
+                println("value = ", refSet1[jaj].valueObj1)
+            end
             dominatedSols = []
             for j in 1:beta
-                if(candidateSolution.valueObj1 < refSet1[j].valueObj1)
+                if(candidateValueObj1 < refSet1[j].valueObj1)
                     push!(dominatedSols,j)
                 end
             end
             if length(dominatedSols) > 0
+                println("solutions dominées refset1 = ", dominatedSols)
                 stop = false
                 distMin = Inf
                 indexMin = -1
                 for j in 1:length(dominatedSols)
-                    dist = distanceSolutions(refSet[dominatedSols[j]], candidateSolution)
+                    dist = distanceSolutions(refSet1[dominatedSols[j]], candidateSolution)
                     if (dist < distMin)
                         distMin = dist
                         indexMin = dominatedSols[j]
                     end
                 end
-                refSet[j] = copySolution(candidateSolution)
+                refSet1[indexMin] = copySolution(candidateSolution)
             end
         end
     end
