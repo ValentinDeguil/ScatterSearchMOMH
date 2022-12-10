@@ -51,7 +51,7 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
         end
 
         # then we transfer the terminals linked to the randOut level 1 to the randIn level 1
-        deltaObj1 = 0
+        deltaObj1::Float32 = 0
         for i in 1:length(currentSol.linksTerminalLevel1)
             if currentSol.linksTerminalLevel1[i] == randOut
                 deltaObj1 -= linkCosts[randOut,i]
@@ -67,6 +67,8 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
         currentSol.valueObj1 += deltaObj1
         obj2 = getValueObj2(currentSol, distancesConcentrators)
         currentSol.valueObj2 = obj2
+        newValue = CalculCoutLink(linkCosts,currentSol.linksTerminalLevel1) + CalculCoutLinkConcentrators(linkConcentratorsCosts,currentSol.setSelectedLevel1,currentSol.linksLevel1Level2)
+        currentSol.valueObj1 = newValue
         push!(newSols, solution(copy(currentSol.setSelectedLevel1), copy(currentSol.linksTerminalLevel1), copy(currentSol.setSelectedLevel2), copy(currentSol.linksLevel1Level2), currentSol.valueObj1, currentSol.valueObj2, currentSol.index))
     end
 
@@ -114,6 +116,8 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
         currentSol.valueObj1 += deltaObj1
         obj2 = getValueObj2(currentSol, distancesConcentrators)
         currentSol.valueObj2 = obj2
+        newValue = CalculCoutLink(linkCosts,currentSol.linksTerminalLevel1) + CalculCoutLinkConcentrators(linkConcentratorsCosts,currentSol.setSelectedLevel1,currentSol.linksLevel1Level2)
+        currentSol.valueObj1 = newValue
         push!(newSols, solution(copy(currentSol.setSelectedLevel1), copy(currentSol.linksTerminalLevel1), copy(currentSol.setSelectedLevel2), copy(currentSol.linksLevel1Level2), currentSol.valueObj1, currentSol.valueObj2, currentSol.index))
     end
 
@@ -190,6 +194,8 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
             #println("val Obj1 = ", currentSol.valueObj1)
             #println("val Obj2 = ", currentSol.valueObj2)
             #println("")
+            newValue = CalculCoutLink(linkCosts,currentSol.linksTerminalLevel1) + CalculCoutLinkConcentrators(linkConcentratorsCosts,currentSol.setSelectedLevel1,currentSol.linksLevel1Level2)
+            currentSol.valueObj1 = newValue
             push!(newSols, solution(copy(currentSol.setSelectedLevel1), copy(currentSol.linksTerminalLevel1), copy(currentSol.setSelectedLevel2), copy(currentSol.linksLevel1Level2), currentSol.valueObj1, currentSol.valueObj2, currentSol.index))
             nbModif = 0
         end
