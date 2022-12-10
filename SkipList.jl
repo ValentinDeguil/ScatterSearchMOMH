@@ -20,7 +20,7 @@ function SkipList()
     return init
 end
 
-function filtrage(init::point,x::Vector{Float64})
+function addArchive(init::point,x::Vector{Float64})
     temp::point = init
     filtrer = false
     suppre = nothing
@@ -51,7 +51,7 @@ function filtrage(init::point,x::Vector{Float64})
 
     if !domine((temp.est).valeur,x) && !domine(temp.valeur,x)
         add(init,temp,x)
-        return true
+        #return true
     end
     #println("FIN!!!!")
 end
@@ -194,6 +194,20 @@ function nbrPoint(head::point)::Int64
     end
     return cpt
 end
+
+
+function SetOfSolution(head::point)::Vector{Vector{Float64}}
+   temp = head
+   setSol::Vector{Float64} = []
+   while(temp.sud!=nothing)
+       temp = temp.sud
+   end
+   while (temp.est != nothing)
+       push!(setSol,test.values)
+   end
+   deleteat!(setSol,length(setSol))
+   return setSol
+end    
 
 #test = SkipList()
 #affichageSkiplist(test)
