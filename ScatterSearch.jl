@@ -141,7 +141,7 @@ function main(pathToInstance::String, sizePopulation::Int)
     # half is good for the first objective the other is good for the second one
     solutionsGRASP=[]
     iterationGRASP = 16
-    globalIndex::Int64 = 1
+    globalIndex = 1
 
     @time for i in 1:iterationGRASP
         baseSolution = generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
@@ -149,6 +149,7 @@ function main(pathToInstance::String, sizePopulation::Int)
         improvedSolution = TabuSearch(1, baseSolution, distancesConcentrators, linkConcentratorsCosts, linkCosts, numberLevel1, numberLevel2)
         improvedSolution.index = globalIndex
         globalIndex += 1
+        println("AAAAAAAAAAAAAAAAAAAAAAA", improvedSolution.index)
         #println("coucou 1 ", improvedSolution.linksTerminalLevel1)
         push!(solutionsGRASP, improvedSolution)
         #generateSolutionObj2(1, linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
@@ -218,6 +219,11 @@ function main(pathToInstance::String, sizePopulation::Int)
         deleteat!(solutionsGRASP, indexMaxDist)
     end
 
+    #println("yooooo")
+    #for i in 1:beta
+    #    println(refSet1[i].index)
+    #end
+
     for i in (beta/2)+1:beta
         maxDist = 0
         indexMaxDist = -1
@@ -235,18 +241,20 @@ function main(pathToInstance::String, sizePopulation::Int)
     end
 
     # here, we try to update refsets if a new sol is improving
+    forbiddenPairs = []
     stop = false
     while !stop
+        println("jaj")
         stop = true
         # here, we process the pathrelinking between all new pairs from refset1 and refset2
-        poolSolutions = []
-        forbiddenPairs = []
         for i in 1:beta
             for j in 1:beta
                 S1 = refSet1[i]
                 S2 = refSet2[j]
                 indexS1 = S1.index
                 indexS2 = S2.index
+                println("indexS1", indexS1)
+                println("indexS1", indexS2)
                 pair = [min(indexS1, indexS2), max(indexS1, indexS2)]
                 if !(pair in forbiddenPairs)
                     newSols = PathRelinking(S1, S2, n, m, Q, linkCosts, linkConcentratorsCosts, distancesConcentrators)
@@ -256,31 +264,57 @@ function main(pathToInstance::String, sizePopulation::Int)
                         improvedSolution1.index = globalIndex
                         improvedSolution2.index = (globalIndex + 1)
                         globalIndex += 2
-                        push!(poolSolutions, improvedSolution1)
-                        push!(poolSolutions, improvedSolution2)
+                        # if we already have these solutions, we don't keep them
+                        keep = true
+                        for i in 1:length(poolSolutions)
+                            if !isDifferent(improvedSolution1,poolSolutions[i])
+                                keep = false
+                                println("yen a une en double 1")
+                            end
+                        end
+                        if keep
+                            push!(poolSolutions, improvedSolution1)
+                        end
+                        keep = true
+                        for i in 1:length(poolSolutions)
+                            if !isDifferent(improvedSolution2,poolSolutions[i])
+                                keep = false
+                                println("yen a une en double 2")
+                            end
+                        end
+                        if keep
+                            push!(poolSolutions, improvedSolution2)
+                        end
                     end
                     push!(forbiddenPairs,pair)
                 end
             end
         end
+
         # we check if we have a dominated solution inside the refset 1
         for i in 1:length(poolSolutions)
+            candidateSolution = poolSolution[i]
             dominatedSols = []
             for j in 1:beta
-                if(poolSolution[i].valueObj1 < refSet1[j].valueObj1)
+                if(candidateSolution.valueObj1 < refSet1[j].valueObj1)
                     push!(dominatedSols,j)
                 end
             end
             if length(dominatedSols) > 0
-
+                stop = false
+                distMin = Inf
+                indexMin = -1
+                for j in 1:length(dominatedSols)
+                    dist = distanceSolutions(refSet[dominatedSols[j]], candidateSolution)
+                    if (dist < distMin)
+                        distMin = dist
+                        indexMin = dominatedSols[j]
+                    end
+                end
+                refSet[j] = copySolution(candidateSolution)
             end
         end
     end
-
-    #for i in 1:beta
-    #    println(refSet2[i].valueObj2)
-    #end
-
 end
 
 main("Instances/verySmall1.txt", 10)

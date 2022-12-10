@@ -46,7 +46,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
 
         ############################### Swap pour les Concentrateurs de niveau 1##################################
         i=1
-        @time while (i <= length(voisinTempSolution.setSelectedLevel1) && !boolAmelioration)
+        while (i <= length(voisinTempSolution.setSelectedLevel1) && !boolAmelioration)
             #println("Boucle swap 1")
             j = 1
             while (j <= length(tabVoisinNonSelectionneLvl1) && !boolAmelioration)
@@ -103,7 +103,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
 
         ############################### Swap pour les Concentrateurs de niveau 2##################################
         i=1
-        @time while(i <= length(voisinTempSolution.setSelectedLevel2) && !boolAmelioration)
+        while(i <= length(voisinTempSolution.setSelectedLevel2) && !boolAmelioration)
             #println("Boucle swap 2")
             j = 1
             while(j <= length(tabVoisinNonSelectionneLvl2) && !boolAmelioration)
@@ -291,9 +291,9 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
         end
     end
     iter+=1
-    println("")
-    println("Iteration : ",iter)
-    println("")
+    #println("")
+    #println("Iteration : ",iter)
+    #println("")
     #println("-----------------------------------------------")
     #println("bestVoisin.setSelectedLevel1 = ", bestVoisin.setSelectedLevel1)
     #println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
@@ -301,7 +301,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
     #println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
     #println("bestVoisin.linksTerminalLevel1 = ", bestVoisin.linksTerminalLevel1)
     #println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
-    println("renvoi Solution")
+    #println("renvoi Solution")
     return bestVoisin
 end
 

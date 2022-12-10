@@ -103,5 +103,5 @@ function CalculCoutLink(linkCost,affectation)
 end
 
 function copySolution(S)
-    return solution(copy(S.setSelectedLevel1), copy(S.linksTerminalLevel1), copy(S.setSelectedLevel2), copy(S.linksLevel1Level2), S.valueObj1, S.valueObj2)
+    return solution(copy(S.setSelectedLevel1), copy(S.linksTerminalLevel1), copy(S.setSelectedLevel2), copy(S.linksLevel1Level2), S.valueObj1, S.valueObj2, S.index)
 end
