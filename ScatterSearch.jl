@@ -143,7 +143,11 @@ function main(pathToInstance::String, sizePopulation::Int)
     iterationGRASP = 16
 
     @time for i in 1:iterationGRASP
-        push!(solutionsGRASP,generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2))
+        baseSolution = generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
+        println("coucou 1 ", baseSolution.linksTerminalLevel1)
+        improvedSolution = TabuSearch(1, baseSolution, distancesConcentrators, linkConcentratorsCosts, linkCosts, numberLevel1, numberLevel2)
+        println("coucou 1 ", improvedSolution.linksTerminalLevel1)
+        push!(solutionsGRASP, improvedSolution)
         #generateSolutionObj2(1, linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
     end
     @time for i in 1:iterationGRASP

@@ -115,7 +115,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
                                 end
                             end
                             voisinTempSolution.setSelectedLevel2[findfirst(x -> x==voisinTempSolution.setSelectedLevel2[i],voisinTempSolution.setSelectedLevel2)] = j
-                            voisinTempSolution.ValueObj2 = calculObj2(voisinTempSolution.setSelectedLevel1,voisinTempSolution.setSelectedLevel2,distancesConcentrators)
+                            voisinTempSolution.valueObj2 = calculObj2(voisinTempSolution.setSelectedLevel1,voisinTempSolution.setSelectedLevel2,distancesConcentrators)
                         end
 
                     else # f = 2 pour objectif 2
