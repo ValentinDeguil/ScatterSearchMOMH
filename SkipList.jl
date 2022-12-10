@@ -51,8 +51,9 @@ function filtrage(init::point,x::Vector{Float64})
 
     if !domine((temp.est).valeur,x) && !domine(temp.valeur,x)
         add(init,temp,x)
+        return true
     end
-    println("FIN!!!!")
+    #println("FIN!!!!")
 end
 
 
@@ -194,16 +195,16 @@ function nbrPoint(head::point)::Int64
     return cpt
 end
 
-test = SkipList()
-affichageSkiplist(test)
-filtrage(test,[1.0,1.0])
-affichageSkiplist(test)
-filtrage(test,[2.0,2.0])
-affichageSkiplist(test)
-filtrage(test,[1.0,2.0])
-affichageSkiplist(test)
-filtrage(test,[3.0,3.0])
-affichageSkiplist(test)
+#test = SkipList()
+#affichageSkiplist(test)
+#filtrage(test,[1.0,1.0])
+#affichageSkiplist(test)
+#filtrage(test,[2.0,2.0])
+#affichageSkiplist(test)
+#filtrage(test,[1.0,2.0])
+#affichageSkiplist(test)
+#filtrage(test,[3.0,3.0])
+#affichageSkiplist(test)
 #filtrage(test,[1.0,2.0])
 #affichageSkiplist(test)
 
