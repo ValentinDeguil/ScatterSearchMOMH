@@ -9,6 +9,9 @@ include("Tools.jl")
 
 function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float32},linkConcentratorsCosts::Matrix{Float32},linkCosts::Matrix{Float32},numberLevel1::Int64, numberLevel2::Int64)
     #println("Début Tabou")
+    println("----------------------------------------------------------")
+    println("----------------------------------------------------------")
+
     nbrIteration::Int32 = 5
     listeTabou::Vector{Int64} = []
     iter::Int32 = 0
@@ -46,7 +49,8 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
 
         ############################### Swap pour les Concentrateurs de niveau 1##################################
         i=1
-        while (i <= length(voisinTempSolution.setSelectedLevel1) && !boolAmelioration)
+        print("time lvl1  : ")
+        @time while (i <= length(voisinTempSolution.setSelectedLevel1) && !boolAmelioration)
             #println("Boucle swap 1")
             j = 1
             while (j <= length(tabVoisinNonSelectionneLvl1) && !boolAmelioration)
@@ -103,7 +107,8 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
 
         ############################### Swap pour les Concentrateurs de niveau 2##################################
         i=1
-        while(i <= length(voisinTempSolution.setSelectedLevel2) && !boolAmelioration)
+        print("time lvl2  : ")
+        @time while(i <= length(voisinTempSolution.setSelectedLevel2) && !boolAmelioration)
             #println("Boucle swap 2")
             j = 1
             while(j <= length(tabVoisinNonSelectionneLvl2) && !boolAmelioration)
@@ -156,7 +161,8 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
             bestVoisinTemp.valueObj1=Inf
             bestVoisinTemp.valueObj1=-Inf
             i=1
-            while(i <= length(listeTabou) && !boolAmelioration)
+            print("time aspiration  : ")
+            @time while(i <= length(listeTabou) && !boolAmelioration)
                 #println("Boucle swap aspiration")
                 if(listeTabou[i] in voisinTempSolution.setSelectedLevel1)
                     setSelectedLevel = voisinTempSolution.setSelectedLevel1
@@ -269,6 +275,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
 
         # Si il y a une amélioration de la solution courante on regarde si cette solution est meilleur que la meilleur solution trouver jusqu'a maintenant
         if boolAmelioration
+            println("Amelioration")
             if f == 1
                 if(voisinTempSolution.valueObj1 < bestVoisin.valueObj1)
                     bestVoisin = deepcopy(voisinTempSolution)
@@ -291,9 +298,10 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
         end
     end
     iter+=1
-    #println("")
-    #println("Iteration : ",iter)
-    #println("")
+
+    println("")
+    println("Iteration : ",iter)
+    println("")
     #println("-----------------------------------------------")
     #println("bestVoisin.setSelectedLevel1 = ", bestVoisin.setSelectedLevel1)
     #println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
@@ -301,7 +309,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
     #println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
     #println("bestVoisin.linksTerminalLevel1 = ", bestVoisin.linksTerminalLevel1)
     #println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
-    #println("renvoi Solution")
+    println("renvoi Solution")
     return bestVoisin
 end
 
@@ -377,8 +385,8 @@ end
 #valueObj2 = 43.889687
 #numberLevel1 = 8
 #numberLevel2 = 2
-#sol = solution(selectedLevel1,links,selectedLevel2,linksLevel1Level2,valueObj1,valueObj2)
-#TabuSearch(2,sol::solution, distancesConcentrators,linkConcentratorsCosts,linkCosts,numberLevel1,numberLevel2)
+#sol = solution(selectedLevel1,links,selectedLevel2,linksLevel1Level2,valueObj1,valueObj2,nothing)
+#@time TabuSearch(2,sol::solution, distancesConcentrators,linkConcentratorsCosts,linkCosts,numberLevel1,numberLevel2)
 
 
 
