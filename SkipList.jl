@@ -75,7 +75,7 @@ function add(head, skiplist::point, x::Vector{Float64})
     newPoint = point(x,nothing,nothing,droite,gauche) #Création du point à ajouter + insertion à droite du point gauche
     gauche.est = newPoint
     droite.ouest = newPoint
-    affichageSkiplist(head)
+    #affichageSkiplist(head)
     cpt = 1
     while pileOuFace()
         cpt+=1
@@ -87,7 +87,7 @@ function add(head, skiplist::point, x::Vector{Float64})
         droite.ouest = temp
         newPoint = temp
     end
-    println("Il a ",cpt,"ligne de ",x)
+    #println("Il a ",cpt,"ligne de ",x)
 end
 
 
@@ -178,7 +178,7 @@ function affichageSkiplist(head::point)
             affichage = affichage * "------"
             affichage = affichage * string(tempEst.valeur)
         end
-        #println(affichage)
+        println(affichage)
     end
 
 end
@@ -212,15 +212,20 @@ end
 
 #test = SkipList()
 #affichageSkiplist(test)
-#filtrage(test,[1.0,1.0])
+#println("")
+#addArchive(test,[1.0,1.0])
 #affichageSkiplist(test)
-#filtrage(test,[2.0,2.0])
+#println("")
+#addArchive(test,[2.0,2.0])
 #affichageSkiplist(test)
-#filtrage(test,[1.0,2.0])
+#println("")
+#addArchive(test,[1.0,2.0])
 #affichageSkiplist(test)
-#filtrage(test,[3.0,3.0])
+#println("")
+#addArchive(test,[3.0,3.0])
 #affichageSkiplist(test)
-#filtrage(test,[1.0,2.0])
+#println("")
+#addArchive(test,[1.0,2.0])
 #affichageSkiplist(test)
 
 

@@ -1,3 +1,5 @@
+using Plots
+
 mutable struct solution
     setSelectedLevel1::Vector{Int64}
     linksTerminalLevel1::Vector{Int64}
@@ -111,4 +113,26 @@ end
 
 function copySolution(S)
     return solution(copy(S.setSelectedLevel1), copy(S.linksTerminalLevel1), copy(S.setSelectedLevel2), copy(S.linksLevel1Level2), S.valueObj1, S.valueObj2, S.index)
+end
+
+function plotResults(SolSkipList::Vector{Vector{Float64}}, other::Vector{Vector{Float64}})
+    xSkip,ySkip,strSkip = xy(SolSkipList,"SkipList")
+    xOther,yOther,strOther = xy(SolSkipList,"All")
+
+    x = xSkip+xOther
+    y = ySkip+yOther
+    str = strSkip+strOther
+    scatter(x,y,groups = str)
+end
+
+function xy(setOfPoint::Vector{Vector{Float64}},str::String)
+    x::Vector{Float64} = []
+    y::Vector{Float64} = []
+    setStr = []
+    for i in 1:length(SetOfPoint)
+        push!(x,setOfPoint[i][1])
+        push!(y,setOfPoint[i][2])
+        push!(setStr,str)
+    end
+    return x,y
 end
