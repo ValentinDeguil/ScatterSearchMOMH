@@ -26,7 +26,7 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
 
     # now we generate new solutions from the initialing sol to the guiding sol
     numberIter = length(In)
-    currentSol = solution(copy(initialingSol.setSelectedLevel1), copy(initialingSol.linksTerminalLevel1), copy(initialingSol.setSelectedLevel2), copy(initialingSol.linksLevel1Level2), initialingSol.valueObj1, initialingSol.valueObj2)
+    currentSol = solution(copy(initialingSol.setSelectedLevel1), copy(initialingSol.linksTerminalLevel1), copy(initialingSol.setSelectedLevel2), copy(initialingSol.linksLevel1Level2), initialingSol.valueObj1, initialingSol.valueObj2, initialingSol.index)
     for i in 1:numberIter
 
         # we select a random move
@@ -67,7 +67,7 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
         currentSol.valueObj1 += deltaObj1
         obj2 = getValueObj2(currentSol, distancesConcentrators)
         currentSol.valueObj2 = obj2
-        push!(newSols, solution(copy(currentSol.setSelectedLevel1), copy(currentSol.linksTerminalLevel1), copy(currentSol.setSelectedLevel2), copy(currentSol.linksLevel1Level2), currentSol.valueObj1, currentSol.valueObj2))
+        push!(newSols, solution(copy(currentSol.setSelectedLevel1), copy(currentSol.linksTerminalLevel1), copy(currentSol.setSelectedLevel2), copy(currentSol.linksLevel1Level2), currentSol.valueObj1, currentSol.valueObj2, currentSol.index))
     end
 
     # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
