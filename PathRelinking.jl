@@ -101,8 +101,8 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
         deltaObj1 = 0
         for i in 1:length(currentSol.linksLevel1Level2)
             if currentSol.linksLevel1Level2[i] == randOut
-                deltaObj1 -= linkConcentratorsCosts[randOut,current.setSelectedLevel1[i]]
-                deltaObj1 += linkConcentratorsCosts[randIn,current.setSelectedLevel1[i]]
+                deltaObj1 -= linkConcentratorsCosts[randOut,currentSol.setSelectedLevel1[i]]
+                deltaObj1 += linkConcentratorsCosts[randIn,currentSol.setSelectedLevel1[i]]
                 currentSol.linksLevel1Level2[i] = randIn
             end
         end
@@ -142,6 +142,7 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
                 #println("on peut juste inverser")
                 #println("current linksTerminalLevel1 = ", currentSol.linksTerminalLevel1)
                 currentSol.linksTerminalLevel1[i] = linkGuiding
+                deltaObj = 0
                 deltaObj1 = -linkCosts[linkCurrent, i]
                 deltaObj1 += linkCosts[linkGuiding, i]
                 currentSol.valueObj1 += deltaObj1
@@ -160,6 +161,7 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
                     if(testLinkCurrent == linkGuiding && guidingSol.linksTerminalLevel1[j] != linkGuiding)
                         # we invert them
                         found = true
+                        deltaObj1 = 0
                         deltaObj1 = -linkCosts[linkCurrent, i]
                         deltaObj1 -= linkCosts[testLinkCurrent, j]
                         deltaObj1 += linkCosts[linkGuiding, i]
