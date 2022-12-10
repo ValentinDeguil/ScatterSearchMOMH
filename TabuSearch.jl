@@ -8,7 +8,7 @@ using DataStructures
 include("Tools.jl")
 
 function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float32},linkConcentratorsCosts::Matrix{Float32},linkCosts::Matrix{Float32},numberLevel1::Int64, numberLevel2::Int64)
-
+    #println("Début Tabou")
     nbrIteration::Int32 = 5
     listeTabou::Vector{Int64} = []
     iter::Int32 = 0
@@ -25,6 +25,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
 
     while iter < nbrIteration
         boolAmelioration::Bool = false #booleen vrai si le voisin améliore la solution faux sinon
+        #println("boucle principale")
 
         #println("bestVoisin.setSelectedLevel1 = ", bestVoisin.setSelectedLevel1)
         #println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
@@ -34,61 +35,67 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
         #println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
         # Création du voisinage
 
+
+        tabVoisinNonSelectionneLvl1::Vector{Int64} = [i for i in 1:numberLevel1]
+        tabVoisinNonSelectionneLvl2::Vector{Int64} = [i for i in numberLevel1:numberLevel1+numberLevel2]
+        tabVoisinNonSelectionneLvl1 = setdiff(tabVoisinNonSelectionneLvl1,voisinTempSolution.setSelectedLevel1)
+        tabVoisinNonSelectionneLvl2 = setdiff(tabVoisinNonSelectionneLvl2,voisinTempSolution.setSelectedLevel2)
+        tabVoisinNonSelectionneLvl1 = setdiff(tabVoisinNonSelectionneLvl1,listeTabou)
+        tabVoisinNonSelectionneLvl2 = setdiff(tabVoisinNonSelectionneLvl2,listeTabou)
+
+
         ############################### Swap pour les Concentrateurs de niveau 1##################################
         i=1
-        while (i <= length(voisinTempSolution.setSelectedLevel1) && !boolAmelioration)
+        @time while (i <= length(voisinTempSolution.setSelectedLevel1) && !boolAmelioration)
+            #println("Boucle swap 1")
             j = 1
-            while (j <= numberLevel1 && !boolAmelioration)
-                if (!(j in voisinTempSolution.setSelectedLevel1) && !(j in listeTabou)) #Possible amélioration avec tri et Dichotomie
-                    if (f == 1) # f = 1 pour objectif 1
-                        #println("test1")
-                        tempValueObj::Float64 = differenceObjectif1(voisinTempSolution.setSelectedLevel1[i],j,i,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts) #différence entre les solutions
-                        if (tempValueObj<0) # Si le swap à permis une amélioration par rapport à voisinTempSolution
-                            #Mise A Jour des Variables
-                            #println("indice modif i = ",voisinTempSolution.setSelectedLevel1[i],"   j = ",j)
-                            boolAmelioration = true
-                            push!(listeTabou, voisinTempSolution.setSelectedLevel1[i])
-                            voisinTempSolution.valueObj1 += tempValueObj
-                            #println("voisinTempSolution.setSelectedLevel1 ",voisinTempSolution.setSelectedLevel1)
-                            #println("findfirst ",findfirst(x -> x==voisinTempSolution.setSelectedLevel1[i],voisinTempSolution.setSelectedLevel1))
-                            for k in 1:length(voisinTempSolution.linksTerminalLevel1)  # Mise à jour des affectations
-                                if (voisinTempSolution.linksTerminalLevel1[k] == voisinTempSolution.setSelectedLevel1[i])
-                                    voisinTempSolution.linksTerminalLevel1[k] = j
-                                end
+            while (j <= length(tabVoisinNonSelectionneLvl1) && !boolAmelioration)
+                if (f == 1) # f = 1 pour objectif 1
+                    #println("test1")
+                    tempValueObj::Float64 = differenceObjectif1(voisinTempSolution.setSelectedLevel1[i],tabVoisinNonSelectionneLvl1[j],i,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts) #différence entre les solutions
+                    if (tempValueObj<0) # Si le swap à permis une amélioration par rapport à voisinTempSolution
+                        #Mise A Jour des Variables
+                        #println("indice modif i = ",voisinTempSolution.setSelectedLevel1[i],"   j = ",j)
+                        boolAmelioration = true
+                        push!(listeTabou, voisinTempSolution.setSelectedLevel1[i])
+                        voisinTempSolution.valueObj1 += tempValueObj
+                        #println("voisinTempSolution.setSelectedLevel1 ",voisinTempSolution.setSelectedLevel1)
+                        #println("findfirst ",findfirst(x -> x==voisinTempSolution.setSelectedLevel1[i],voisinTempSolution.setSelectedLevel1))
+                        for k in 1:length(voisinTempSolution.linksTerminalLevel1)  # Mise à jour des affectations
+                            if (voisinTempSolution.linksTerminalLevel1[k] == voisinTempSolution.setSelectedLevel1[i])
+                                voisinTempSolution.linksTerminalLevel1[k] = tabVoisinNonSelectionneLvl1[j]
                             end
-                            voisinTempSolution.setSelectedLevel1[findfirst(x -> x==voisinTempSolution.setSelectedLevel1[i],voisinTempSolution.setSelectedLevel1)] = j
-                            voisinTempSolution.valueObj2 = calculObj2(voisinTempSolution.setSelectedLevel1,voisinTempSolution.setSelectedLevel2,distancesConcentrators)
                         end
-
-                    else # f = 2 pour objectif 2
-                        #println("test1")
-                        tempSetSelectedLevel1 = copy(voisinTempSolution.setSelectedLevel1)
-                        tempSetSelectedLevel1[findfirst(x -> x==voisinTempSolution.setSelectedLevel1[i],voisinTempSolution.setSelectedLevel1)] = j
-                        tempValueObj = calculObj2(tempSetSelectedLevel1,voisinTempSolution.setSelectedLevel2,distancesConcentrators)
-                        if (voisinTempSolution.valueObj2 < tempValueObj)
-                            #println("test11")
-                            #println("indice modif i = ",voisinTempSolution.setSelectedLevel1[i],"   j = ",j)
-                            boolAmelioration = true
-                            push!(listeTabou, voisinTempSolution.setSelectedLevel1[i])
-                            voisinTempSolution.valueObj1 += differenceObjectif1(voisinTempSolution.setSelectedLevel1[i],j,i,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts)
-                            #println("test11")
-                            voisinTempSolution.valueObj2 = tempValueObj
-
-                            for k in 1:length(voisinTempSolution.linksTerminalLevel1)  # Mise à jour des affectations
-                                #println("voisinTempSolution.linksTerminalLevel1[k] ", voisinTempSolution.linksTerminalLevel1[k] )
-                                #println("voisinTempSolution.setSelectedLevel1[i] ",voisinTempSolution.setSelectedLevel1[i])
-                                if(voisinTempSolution.linksTerminalLevel1[k] == voisinTempSolution.setSelectedLevel1[i])
-                                    #println("jaj")
-                                    voisinTempSolution.linksTerminalLevel1[k] = j
-                                end
+                        voisinTempSolution.setSelectedLevel1[findfirst(x -> x==voisinTempSolution.setSelectedLevel1[i],voisinTempSolution.setSelectedLevel1)] = tabVoisinNonSelectionneLvl1[j]
+                        voisinTempSolution.valueObj2 = calculObj2(voisinTempSolution.setSelectedLevel1,voisinTempSolution.setSelectedLevel2,distancesConcentrators)
+                    end
+                else # f = 2 pour objectif 2
+                    #println("test1")
+                    tempSetSelectedLevel1 = copy(voisinTempSolution.setSelectedLevel1)
+                    tempSetSelectedLevel1[findfirst(x -> x==voisinTempSolution.setSelectedLevel1[i],voisinTempSolution.setSelectedLevel1)] = tabVoisinNonSelectionneLvl1[j]
+                    tempValueObj = calculObj2(tempSetSelectedLevel1,voisinTempSolution.setSelectedLevel2,distancesConcentrators)
+                    if (voisinTempSolution.valueObj2 < tempValueObj)
+                        #println("test11")
+                        #println("indice modif i = ",voisinTempSolution.setSelectedLevel1[i],"   j = ",j)
+                        boolAmelioration = true
+                        push!(listeTabou, voisinTempSolution.setSelectedLevel1[i])
+                        voisinTempSolution.valueObj1 += differenceObjectif1(voisinTempSolution.setSelectedLevel1[i],tabVoisinNonSelectionneLvl1[j],i,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts)
+                        #println("test11")
+                        voisinTempSolution.valueObj2 = tempValueObj
+                        for k in 1:length(voisinTempSolution.linksTerminalLevel1)  # Mise à jour des affectations
+                            #println("voisinTempSolution.linksTerminalLevel1[k] ", voisinTempSolution.linksTerminalLevel1[k] )
+                            #println("voisinTempSolution.setSelectedLevel1[i] ",voisinTempSolution.setSelectedLevel1[i])
+                            if(voisinTempSolution.linksTerminalLevel1[k] == voisinTempSolution.setSelectedLevel1[i])
+                                #println("jaj")
+                                voisinTempSolution.linksTerminalLevel1[k] = tabVoisinNonSelectionneLvl1[j]
                             end
-                            voisinTempSolution.setSelectedLevel1 = tempSetSelectedLevel1
-                            #println("voisinTempSolution.linksTerminalLevel1",voisinTempSolution.linksTerminalLevel1)
-                            #println("test11")
                         end
+                        voisinTempSolution.setSelectedLevel1 = tempSetSelectedLevel1
+                        #println("voisinTempSolution.linksTerminalLevel1",voisinTempSolution.linksTerminalLevel1)
+                        #println("test11")
                     end
                 end
-                j +=1
+                j+=1
             end
             i+=1
         end
@@ -96,46 +103,44 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
 
         ############################### Swap pour les Concentrateurs de niveau 2##################################
         i=1
-        while(i <= length(voisinTempSolution.setSelectedLevel2) && !boolAmelioration)
-            j = numberLevel1+1
-            while(j <= numberLevel2+numberLevel1 && !boolAmelioration)
-                if (!(j in voisinTempSolution.setSelectedLevel2) && !(j in listeTabou)) #Possible amélioration avec tri et Dichotomie
-                    if (f == 1) # f = 1 pour objectif 1
-                        #println("test2")
-                        tempValueObj = differenceObjectif1Level2(voisinTempSolution.setSelectedLevel2[i],j,voisinTempSolution.linksLevel1Level2,linkConcentratorsCosts) #différence entre les solutions
-                        if (tempValueObj<0) # Si le swap à permis une amélioration par rapport à voisinTempSolution
-                            #println("indice modif i = ",voisinTempSolution.setSelectedLevel2[i],"   j = ",j)
-                            #Mise A Jour des Variables
-                            boolAmelioration = true
-                            push!(listeTabou, voisinTempSolution.setSelectedLevel2[i])
-                            voisinTempSolution.valueObj1 += tempValueObj
-                            for k in 1:length(voisinTempSolution.linksLevel1Level2)  # Mise à jour des affectations
-                                if (voisinTempSolution.linksLevel1Level2[k] == voisinTempSolution.setSelectedLevel2[i])
-                                    voisinTempSolution.linksLevel1Level2[k] = j
-                                end
+        @time while(i <= length(voisinTempSolution.setSelectedLevel2) && !boolAmelioration)
+            #println("Boucle swap 2")
+            j = 1
+            while(j <= length(tabVoisinNonSelectionneLvl2) && !boolAmelioration)
+                if (f == 1) # f = 1 pour objectif 1
+                    #println("test2")
+                    tempValueObj = differenceObjectif1Level2(voisinTempSolution.setSelectedLevel2[i],tabVoisinNonSelectionneLvl2[j],voisinTempSolution.linksLevel1Level2,linkConcentratorsCosts) #différence entre les solutions
+                    if (tempValueObj<0) # Si le swap à permis une amélioration par rapport à voisinTempSolution
+                        #println("indice modif i = ",voisinTempSolution.setSelectedLevel2[i],"   j = ",j)
+                        #Mise A Jour des Variables
+                        boolAmelioration = true
+                        push!(listeTabou, voisinTempSolution.setSelectedLevel2[i])
+                        voisinTempSolution.valueObj1 += tempValueObj
+                        for k in 1:length(voisinTempSolution.linksLevel1Level2)  # Mise à jour des affectations
+                            if (voisinTempSolution.linksLevel1Level2[k] == voisinTempSolution.setSelectedLevel2[i])
+                                voisinTempSolution.linksLevel1Level2[k] = tabVoisinNonSelectionneLvl2[j]
                             end
-                            voisinTempSolution.setSelectedLevel2[findfirst(x -> x==voisinTempSolution.setSelectedLevel2[i],voisinTempSolution.setSelectedLevel2)] = j
-                            voisinTempSolution.valueObj2 = calculObj2(voisinTempSolution.setSelectedLevel1,voisinTempSolution.setSelectedLevel2,distancesConcentrators)
                         end
-
-                    else # f = 2 pour objectif 2
-                        #println("test2")
-                        tempSetSelectedLevel2 = copy(voisinTempSolution.setSelectedLevel2)
-                        tempSetSelectedLevel2[findfirst(x -> x==tempSetSelectedLevel2[i],tempSetSelectedLevel2)] = j
-                        tempValueObj = calculObj2(voisinTempSolution.setSelectedLevel1,tempSetSelectedLevel2,distancesConcentrators)
-                        if (voisinTempSolution.valueObj2 < tempValueObj)
-                            #println("indice modif i = ",voisinTempSolution.setSelectedLevel2[i],"   j = ",j)
-                            boolAmelioration = true
-                            push!(listeTabou, i)
-                            voisinTempSolution.valueObj1 += differenceObjectif1Level2(i,j,voisinTempSolution.linksLevel1Level2,linkConcentratorsCosts)
-                            voisinTempSolution.valueObj2 = tempValueObj
-                            for k in 1:length(voisinTempSolution.linksLevel1Level2)  # Mise à jour des affectations
-                                if (voisinTempSolution.linksLevel1Level2[k] == voisinTempSolution.setSelectedLevel2[i])
-                                    voisinTempSolution.linksLevel1Level2[k] = j
-                                end
+                        voisinTempSolution.setSelectedLevel2[findfirst(x -> x==voisinTempSolution.setSelectedLevel2[i],voisinTempSolution.setSelectedLevel2)] = tabVoisinNonSelectionneLvl2[j]
+                        voisinTempSolution.valueObj2 = calculObj2(voisinTempSolution.setSelectedLevel1,voisinTempSolution.setSelectedLevel2,distancesConcentrators)
+                    end
+                else # f = 2 pour objectif 2
+                    #println("test2")
+                    tempSetSelectedLevel2 = copy(voisinTempSolution.setSelectedLevel2)
+                    tempSetSelectedLevel2[findfirst(x -> x==tempSetSelectedLevel2[i],tempSetSelectedLevel2)] = tabVoisinNonSelectionneLvl2[j]
+                    tempValueObj = calculObj2(voisinTempSolution.setSelectedLevel1,tempSetSelectedLevel2,distancesConcentrators)
+                    if (voisinTempSolution.valueObj2 < tempValueObj)
+                        #println("indice modif i = ",voisinTempSolution.setSelectedLevel2[i],"   j = ",j)
+                        boolAmelioration = true
+                        push!(listeTabou, i)
+                        voisinTempSolution.valueObj1 += differenceObjectif1Level2(i,j,voisinTempSolution.linksLevel1Level2,linkConcentratorsCosts)
+                        voisinTempSolution.valueObj2 = tempValueObj
+                        for k in 1:length(voisinTempSolution.linksLevel1Level2)  # Mise à jour des affectations
+                            if (voisinTempSolution.linksLevel1Level2[k] == voisinTempSolution.setSelectedLevel2[i])
+                                voisinTempSolution.linksLevel1Level2[k] = tabVoisinNonSelectionneLvl2[j]
                             end
-                            voisinTempSolution.setSelectedLevel2 = tempSetSelectedLevel2
                         end
+                        voisinTempSolution.setSelectedLevel2 = tempSetSelectedLevel2
                     end
                 end
                 j +=1
@@ -152,6 +157,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
             bestVoisinTemp.valueObj1=-Inf
             i=1
             while(i <= length(listeTabou) && !boolAmelioration)
+                #println("Boucle swap aspiration")
                 if(listeTabou[i] in voisinTempSolution.setSelectedLevel1)
                     setSelectedLevel = voisinTempSolution.setSelectedLevel1
                     bestTempSetSelectedLevel = bestVoisinTemp.setSelectedLevel1
@@ -267,12 +273,12 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
                 if(voisinTempSolution.valueObj1 < bestVoisin.valueObj1)
                     bestVoisin = deepcopy(voisinTempSolution)
                 end
-                iter = 0
+                iter = -1
             else
                 if(voisinTempSolution.valueObj2 > bestVoisin.valueObj2)
                     bestVoisin = deepcopy(voisinTempSolution)
                 end
-                iter = 0
+                iter = -1
             end
 
         else # cas ou aucune solution améliorante est trouvé
@@ -284,6 +290,10 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
             deleteat!(listeTabou,1)
         end
     end
+    iter+=1
+    println("")
+    println("Iteration : ",iter)
+    println("")
     #println("-----------------------------------------------")
     #println("bestVoisin.setSelectedLevel1 = ", bestVoisin.setSelectedLevel1)
     #println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
@@ -291,6 +301,7 @@ function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float
     #println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
     #println("bestVoisin.linksTerminalLevel1 = ", bestVoisin.linksTerminalLevel1)
     #println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
+    println("renvoi Solution")
     return bestVoisin
 end
 
@@ -366,8 +377,6 @@ end
 #valueObj2 = 43.889687
 #numberLevel1 = 8
 #numberLevel2 = 2
-
-
 #sol = solution(selectedLevel1,links,selectedLevel2,linksLevel1Level2,valueObj1,valueObj2)
 #TabuSearch(2,sol::solution, distancesConcentrators,linkConcentratorsCosts,linkCosts,numberLevel1,numberLevel2)
 

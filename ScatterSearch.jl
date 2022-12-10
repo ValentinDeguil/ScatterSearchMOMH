@@ -239,4 +239,4 @@ function main(pathToInstance::String, sizePopulation::Int)
 
 end
 
-main("Instances/small1.txt", 10)
+main("Instances/verySmall1.txt", 10)
