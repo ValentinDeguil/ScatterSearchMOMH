@@ -151,7 +151,7 @@ function main(pathToInstance::String, sizePopulation::Int)
         push!(TabSolution2,generateSolutionObj2(linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2))
     end
 
-    PathRelinking(TabSolution1[1], TabSolution2[1], n, m, Q, linkCosts, linkConcentratorsCosts, distancesConcentrators)
+    @time PathRelinking(TabSolution1[1], TabSolution2[1], n, m, Q, linkCosts, linkConcentratorsCosts, distancesConcentrators)
 
     #@time TabuSearch(2,TabSolution1[1] ,C1, C2, distancesConcentrators,linkConcentratorsCosts,linkCosts,numberLevel1,numberLevel2)
 
@@ -162,4 +162,4 @@ function main(pathToInstance::String, sizePopulation::Int)
 
 end
 
-main("Instances/verySmall1.txt", 10)
+main("Instances/large1.txt", 10)
