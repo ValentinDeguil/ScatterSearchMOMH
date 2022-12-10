@@ -198,13 +198,14 @@ end
 
 function setOfSolutions(head::point)::Vector{Vector{Float64}}
    temp = head
-   setSol::Vector{Vector{Float64}} = []
+   setSol = Vector{Vector{Float64}}()
    while(temp.sud!=nothing)
        temp = temp.sud
    end
    while (temp.est != nothing)
        temp = temp.est
-       push!(setSol,temp.valeur)
+       test = temp.valeur
+       push!(setSol,test)
    end
    deleteat!(setSol,length(setSol))
    return setSol
