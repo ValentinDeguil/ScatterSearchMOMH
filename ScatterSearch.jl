@@ -139,27 +139,100 @@ function main(pathToInstance::String, sizePopulation::Int)
 
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
-    TabSolution1=[]
-    TabSolution2=[]
+    solutionsGRASP=[]
+    iterationGRASP = 16
 
-    @time for i in 1:1 #16
-        push!(TabSolution1,generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2))
+    @time for i in 1:iterationGRASP
+        push!(solutionsGRASP,generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2))
         #generateSolutionObj2(1, linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
     end
-    @time for i in 1:1 #16
+    @time for i in 1:iterationGRASP
         #generateSolutionObj1(1, linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
-        push!(TabSolution2,generateSolutionObj2(linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2))
+        push!(solutionsGRASP,generateSolutionObj2(linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2))
     end
 
-    @time PathRelinking(TabSolution1[1], TabSolution2[1], n, m, Q, linkCosts, linkConcentratorsCosts, distancesConcentrators)
+    #@time PathRelinking(TabSolution1[1], TabSolution2[1], n, m, Q, linkCosts, linkConcentratorsCosts, distancesConcentrators)
 
     #@time TabuSearch(2,TabSolution1[1] ,C1, C2, distancesConcentrators,linkConcentratorsCosts,linkCosts,numberLevel1,numberLevel2)
 
-    # generer 24 solutions = 25 secondes
-    # generer 2*16 solutions = 33 secondes donc environ 1 sec / sol pour large1.txt
+    # building the initial refSets of size beta
     refSet1 = []
     refSet2 = []
+    beta = 8
+    #for i in 1:32
+    #    println(solutionsGRASP[i].valueObj1)
+    #end
+    #println("")
+    #for i in 1:32
+    #    println(solutionsGRASP[i].valueObj2)
+    #end
+
+    # first, we add the best beta/2 solutions for each objective of respective refsets
+    for i in 1:beta/2
+        bestObj1 = Inf
+        indexBestObj1 = -1
+        for j in 1:length(solutionsGRASP)
+            valCandidate = solutionsGRASP[j].valueObj1
+            if  valCandidate < bestObj1
+                bestObj1 = valCandidate
+                indexBestObj1 = j
+            end
+        end
+        push!(refSet1, copySolution(solutionsGRASP[indexBestObj1]))
+        deleteat!(solutionsGRASP, indexBestObj1)
+    end
+
+    for i in 1:beta/2
+        bestObj2 = 0
+        indexBestObj2 = -1
+        for j in 1:length(solutionsGRASP)
+            valCandidate = solutionsGRASP[j].valueObj2
+            if  valCandidate > bestObj2
+                bestObj2 = valCandidate
+                indexBestObj2 = j
+            end
+        end
+        push!(refSet2, copySolution(solutionsGRASP[indexBestObj2]))
+        deleteat!(solutionsGRASP, indexBestObj2)
+    end
+
+    # now, we build the second half of the refset by adding the most distant solutions to each refset
+    for i in (beta/2)+1:beta
+        maxDist = 0
+        indexMaxDist = -1
+        for j in 1:length(solutionsGRASP)
+            for k in 1:length(refSet1)
+                distCandidate = distanceSolutions(solutionsGRASP[j], refSet1[k])
+                if distCandidate > maxDist
+                    maxDist = distCandidate
+                    indexMaxDist = j
+                end
+            end
+        end
+        push!(refSet1, copySolution(solutionsGRASP[indexMaxDist]))
+        deleteat!(solutionsGRASP, indexMaxDist)
+    end
+
+    for i in (beta/2)+1:beta
+        maxDist = 0
+        indexMaxDist = -1
+        for j in 1:length(solutionsGRASP)
+            for k in 1:length(refSet2)
+                distCandidate = distanceSolutions(solutionsGRASP[j], refSet2[k])
+                if distCandidate > maxDist
+                    maxDist = distCandidate
+                    indexMaxDist = j
+                end
+            end
+        end
+        push!(refSet2, copySolution(solutionsGRASP[indexMaxDist]))
+        deleteat!(solutionsGRASP, indexMaxDist)
+    end
+
+    #for i in 1:beta
+    #    println(refSet2[i].valueObj2)
+    #end
 
 end
 
-main("Instances/large1.txt", 10)
+main("Instances/small1.txt", 10)

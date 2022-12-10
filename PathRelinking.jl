@@ -197,7 +197,7 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
 
     # faire les mouvements
 
-    println("length = ", length(newSols))
+    #println("length = ", length(newSols))
     for i in 1:length(newSols)
         #println(newSols[i].valueObj1)
         #println(newSols[i].valueObj2)

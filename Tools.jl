@@ -35,7 +35,7 @@ function isDifferent(S1, S2)
     linksTermS2 = S2.linksTerminalLevel1
     for i in 1:length(linksTermS1)
         if (linksTermS1[i] != linksTermS2[i])
-            return false
+            return true
         end
     end
 
@@ -43,11 +43,11 @@ function isDifferent(S1, S2)
     linksConcS2 = S2.linksLevel1Level2
     for i in 1:length(linksConcS1)
         if (linksConcS1[i] != linksConcS2[i])
-            return false
+            return true
         end
     end
 
-    return true
+    return false
 end
 
 function getSetInOutLevel1(S1, S2)
@@ -99,4 +99,8 @@ function CalculCoutLink(linkCost,affectation)
         valeur += linkCost[affectation[i],i]
     end
     return valeur
+end
+
+function copySolution(S)
+    return solution(copy(S.setSelectedLevel1), copy(S.linksTerminalLevel1), copy(S.setSelectedLevel2), copy(S.linksLevel1Level2), S.valueObj1, S.valueObj2)
 end
