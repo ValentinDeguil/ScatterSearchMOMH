@@ -7,24 +7,24 @@ TabuSearch:
 using DataStructures
 include("Tools.jl")
 
-function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeningLevel2::Number, distancesConcentrators::Matrix{Float32},linkConcentratorsCosts::Matrix{Float32},linkCosts::Matrix{Float32},numberLevel1::Int64, numberLevel2::Int64)
+function TabuSearch(f::Int64,sol::solution, distancesConcentrators::Matrix{Float32},linkConcentratorsCosts::Matrix{Float32},linkCosts::Matrix{Float32},numberLevel1::Int64, numberLevel2::Int64)
 
-    nbrIteration = 5
-    listeTabou = []
-    iter = 0
+    nbrIteration::Int32 = 5
+    listeTabou::Vector{Int64} = []
+    iter::Int32 = 0
 
-    bestVoisin = deepcopy(sol) #meilleur voisin trouvé
-    voisinTempSolution = deepcopy(sol) #voisin local
+    bestVoisin::solution = deepcopy(sol) #meilleur voisin trouvé
+    voisinTempSolution::solution = deepcopy(sol) #voisin local
 
-    println("bestVoisin.setSelectedLevel1 = ", bestVoisin.setSelectedLevel1)
-    println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
-    println("bestVoisin.valueObj1 = ", bestVoisin.valueObj1)
-    println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
-    println("bestVoisin.linksTerminalLevel1 = ", bestVoisin.linksTerminalLevel1)
-    println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
+    #println("bestVoisin.setSelectedLevel1 = ", bestVoisin.setSelectedLevel1)
+    #println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
+    #println("bestVoisin.valueObj1 = ", bestVoisin.valueObj1)
+    #println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
+    #println("bestVoisin.linksTerminalLevel1 = ", bestVoisin.linksTerminalLevel1)
+    #println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
 
     while iter < nbrIteration
-        boolAmelioration = false #booleen vrai si le voisin améliore la solution faux sinon
+        boolAmelioration::Bool = false #booleen vrai si le voisin améliore la solution faux sinon
 
         #println("bestVoisin.setSelectedLevel1 = ", bestVoisin.setSelectedLevel1)
         #println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
@@ -42,7 +42,7 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
                 if (!(j in voisinTempSolution.setSelectedLevel1) && !(j in listeTabou)) #Possible amélioration avec tri et Dichotomie
                     if (f == 1) # f = 1 pour objectif 1
                         #println("test1")
-                        tempValueObj = differenceObjectif1(voisinTempSolution.setSelectedLevel1[i],j,i,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts) #différence entre les solutions
+                        tempValueObj::Float64 = differenceObjectif1(voisinTempSolution.setSelectedLevel1[i],j,i,voisinTempSolution.linksTerminalLevel1,voisinTempSolution.linksLevel1Level2,linkCosts,linkConcentratorsCosts) #différence entre les solutions
                         if (tempValueObj<0) # Si le swap à permis une amélioration par rapport à voisinTempSolution
                             #Mise A Jour des Variables
                             #println("indice modif i = ",voisinTempSolution.setSelectedLevel1[i],"   j = ",j)
@@ -284,17 +284,18 @@ function TabuSearch(f::Int64,sol::solution ,costOpeningLevel1::Number, costOpeni
             deleteat!(listeTabou,1)
         end
     end
-    println("bestVoisin.setSelectedLevel1 = ", bestVoisin.setSelectedLevel1)
-    println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
-    println("bestVoisin.valueObj1 = ", bestVoisin.valueObj1)
-    println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
-    println("bestVoisin.linksTerminalLevel1 = ", bestVoisin.linksTerminalLevel1)
-    println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
+    #println("-----------------------------------------------")
+    #println("bestVoisin.setSelectedLevel1 = ", bestVoisin.setSelectedLevel1)
+    #println("bestVoisin.setSelectedLevel2 = ", bestVoisin.setSelectedLevel2)
+    #println("bestVoisin.valueObj1 = ", bestVoisin.valueObj1)
+    #println("bestVoisin.valueObj2 = ", bestVoisin.valueObj2)
+    #println("bestVoisin.linksTerminalLevel1 = ", bestVoisin.linksTerminalLevel1)
+    #println("bestVoisin.linksLevel1Level2 = ", bestVoisin.linksLevel1Level2)
     return bestVoisin
 end
 
 function differenceObjectif1(i,j,indiceAffectationLevel2,affectationLevel1,affectationLevel2,linkCostsTerminal,linkCostsConcentrator)
-    valeur = 0.0
+    valeur::Float64 = 0.0
     listeAffectationLevel1 = findall(x -> x==i,affectationLevel1)
     for a in listeAffectationLevel1
         valeur += linkCostsTerminal[j,a] - linkCostsTerminal[i,a]
@@ -315,7 +316,7 @@ function differenceObjectif1(i,j,indiceAffectationLevel2,affectationLevel1,affec
 end
 
 function differenceObjectif1Level2(i,j,affectation,linkCosts)
-    valeur = 0
+    valeur::Float64 = 0.0
     listeAffectation = findall(x -> x==i,affectation)
     for a in listeAffectation
         valeur += linkCosts[a,j] - linkCosts[a,i]
@@ -329,7 +330,7 @@ function calculObj2(setSelectedLevel1,setSelectedLevel2,distancesConcentrators::
 
     allConcentrators = vcat(setSelectedLevel1, setSelectedLevel2)
     nbConcentrators = length(allConcentrators)
-    valueObj2 = 0
+    valueObj2::Float64 = 0
     for i in 1:nbConcentrators
         min = Inf
         for j in 1:(i-1)
@@ -365,11 +366,10 @@ end
 #valueObj2 = 43.889687
 #numberLevel1 = 8
 #numberLevel2 = 2
-#
-#
-#sol = solution(selectedLevel1,links,selectedLevel2,linksLevel1Level2,valueObj1,valueObj2)
 
-#TabuSearch(2,sol::solution ,0, 0, distancesConcentrators,linkConcentratorsCosts,linkCosts,numberLevel1,numberLevel2)
+
+#sol = solution(selectedLevel1,links,selectedLevel2,linksLevel1Level2,valueObj1,valueObj2)
+#TabuSearch(2,sol::solution, distancesConcentrators,linkConcentratorsCosts,linkCosts,numberLevel1,numberLevel2)
 
 
 
