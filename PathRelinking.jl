@@ -15,14 +15,6 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
 
     # we determine In, the set of level 1 to add and Out the set of level 1 to remove
     In, Out = getSetInOutLevel1(initialingSol, guidingSol)
-    #println("avant")
-    #println("initialingSol level1 = ", initialingSol.setSelectedLevel1)
-    #println("guidingSol level1 = ", guidingSol.setSelectedLevel1)
-    #println("In = ", In, " Out = ", Out)
-    #println("ValueObj1 Initiating = ", initialingSol.valueObj1)
-    #println("ValueObj2 Initiating = ", initialingSol.valueObj2)
-    #println("ValueObj1 Guiding = ", guidingSol.valueObj1)
-    #println("ValueObj2 Guiding = ", guidingSol.valueObj2)
 
     # now we generate new solutions from the initialing sol to the guiding sol
     numberIter = length(In)
@@ -37,10 +29,6 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
         randOutIndex = rand(1:length(Out))
         randOut = Out[randOutIndex]
         deleteat!(Out, randOutIndex)
-
-        #println("random couple = ", randOut, " ", randIn)
-        #println("avant transfert : ", currentSol.setSelectedLevel1)
-        #println("avant transfert : ", currentSol.linksTerminalLevel1)
 
         # we edit our previous solution to get a new one closer to the guiding sol
         # first we close the randOut level 1 and open the randIn level 1
@@ -59,8 +47,6 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
                 currentSol.linksTerminalLevel1[i] = randIn
             end
         end
-        #println("après transfert : ", currentSol.setSelectedLevel1)
-        #println("après transfert : ", currentSol.linksTerminalLevel1)
         temp = usedPorts[randOut]
         usedPorts[randOut] = usedPorts[randIn]
         usedPorts[randIn] = temp
@@ -73,7 +59,7 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
     end
 
     # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
-    #println("on passe aux concentrateurs de level 2")
+
     # we do the same for the level 2 concentrators
     In, Out = getSetInOutLevel2(currentSol, guidingSol)
     numberIter = length(In)
@@ -87,10 +73,6 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
         randOutIndex = rand(1:length(Out))
         randOut = Out[randOutIndex]
         deleteat!(Out, randOutIndex)
-
-        #println("random couple = ", randOut, " ", randIn)
-        #println("avant transfert : ", currentSol.setSelectedLevel2)
-        #println("avant transfert : ", currentSol.linksLevel1Level2)
 
         # we edit our previous solution to get a new one closer to the guiding sol
         # first we close the randOut level 2 and open the randIn level 2
@@ -108,8 +90,7 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
                 currentSol.linksLevel1Level2[i] = randIn
             end
         end
-        #println("avant transfert : ", currentSol.setSelectedLevel2)
-        #println("avant transfert : ", currentSol.linksLevel1Level2)
+
         temp = usedPorts[randOut]
         usedPorts[randOut] = usedPorts[randIn]
         usedPorts[randIn] = temp
@@ -122,13 +103,7 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
     end
 
     # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% #
-    #println("on passe aux liens des terminaux")
-    #println("usedPorts = ", usedPorts)
-    #println("current selectedLevel1 = ", currentSol.setSelectedLevel1)
-    #println("current linksTerminalLevel1 = ", currentSol.linksTerminalLevel1)
-    #println("guiding linksTerminalLevel1 = ", guidingSol.linksTerminalLevel1)
-    #println("current selectedLevel2 = ", currentSol.setSelectedLevel2)
-    #println("current linksLevel1Level2 = ", currentSol.linksLevel1Level2)
+
     # now, we want the same links between terminals and level 1 in the initiating and the guiding
     # we add a number of update before we return a new solution, otherwise, we have too much solutions to compute and improve
     nbModif = 0
@@ -136,15 +111,10 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
     for i in 1:n
         linkCurrent = currentSol.linksTerminalLevel1[i]
         linkGuiding = guidingSol.linksTerminalLevel1[i]
-        #println("new test, i = ", i)
-        #println("linkCurrent = ", linkCurrent)
-        #println("linkGuiding = ", linkGuiding)
         # if a terminal is well linked, we do nothing
         if(linkCurrent != linkGuiding)
             # if the terminal can just be moved, we do this
             if usedPorts[linkGuiding] < Q
-                #println("on peut juste inverser")
-                #println("current linksTerminalLevel1 = ", currentSol.linksTerminalLevel1)
                 currentSol.linksTerminalLevel1[i] = linkGuiding
                 deltaObj = 0
                 deltaObj1 = -linkCosts[linkCurrent, i]
@@ -153,10 +123,7 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
                 usedPorts[linkGuiding] += 1
                 usedPorts[linkCurrent] -= 1
                 nbModif += 1
-                #println("current linksTerminalLevel1 = ", currentSol.linksTerminalLevel1)
-                #println("guiding linksTerminalLevel1 = ", guidingSol.linksTerminalLevel1)
             else
-                #println("ok plus compliqué")
                 j = i+1
                 found = false
                 # we look for another bad linked terminal
@@ -170,15 +137,9 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
                         deltaObj1 -= linkCosts[testLinkCurrent, j]
                         deltaObj1 += linkCosts[linkGuiding, i]
                         deltaObj1 += linkCosts[linkCurrent, j]
-                        #println("current linksTerminalLevel1 = ", currentSol.linksTerminalLevel1)
-                        #println("AVANT OBJ1 ", currentSol.valueObj1)
-                        #println("deltaObj1 = ", deltaObj1)
                         currentSol.valueObj1 += deltaObj1
-                        #println("APRES OBJ1 ", currentSol.valueObj1)
                         currentSol.linksTerminalLevel1[i] = linkGuiding
                         currentSol.linksTerminalLevel1[j] = linkCurrent
-                        #println("current linksTerminalLevel1 = ", currentSol.linksTerminalLevel1)
-                        #println("guiding linksTerminalLevel1 = ", guidingSol.linksTerminalLevel1)
                         nbModif += 1
                     else
                         # we look for another one bad linked terminal
@@ -187,13 +148,8 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
                 end
             end
         end
-        #println("")
 
         if nbModif == maxModif
-            #println("nouvelle solution car 10 modifs")
-            #println("val Obj1 = ", currentSol.valueObj1)
-            #println("val Obj2 = ", currentSol.valueObj2)
-            #println("")
             newValue = CalculCoutLink(linkCosts,currentSol.linksTerminalLevel1) + CalculCoutLinkConcentrators(linkConcentratorsCosts,currentSol.setSelectedLevel1,currentSol.linksLevel1Level2)
             currentSol.valueObj1 = newValue
             push!(newSols, solution(copy(currentSol.setSelectedLevel1), copy(currentSol.linksTerminalLevel1), copy(currentSol.setSelectedLevel2), copy(currentSol.linksLevel1Level2), currentSol.valueObj1, currentSol.valueObj2, currentSol.index))
@@ -201,15 +157,5 @@ function PathRelinking(initialingSol, guidingSol, n, m, Q, linkCosts, linkConcen
         end
     end
 
-    # trouver les diff entre les sets de concentrateurs de niv 2
-
-    # faire les mouvements
-
-    #println("length = ", length(newSols))
-    for i in 1:length(newSols)
-        #println(newSols[i].valueObj1)
-        #println(newSols[i].valueObj2)
-        #println("")
-    end
     return newSols
 end
