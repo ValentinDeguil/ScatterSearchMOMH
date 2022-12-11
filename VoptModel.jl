@@ -156,7 +156,7 @@ function InstanceCreation(pathToInstance::String)
     C1 = 0 #100
     C2 = 0 #200
 
-    return Instance(pathToInstance,numberLevel1,numberLevel2,n,distancesConcentrators,linkCosts,linkConcentratorsCosts,C1,C2,Q)
+    return Instance(pathToInstance,numberLevel1,numberLevel2,n,round.(Int,distancesConcentrators),round.(Int,linkCosts),round.(Int,linkConcentratorsCosts),C1,C2,Q)
 end
 
 
@@ -184,20 +184,28 @@ end
     createModel2UFLP(solver::DataType, data::Instance)
     Create the vOptGeneric model of 2UFLP
 """
-function createModel2UFLP(solver::DataType, data::Instance)
+function createModelTSUFLP(solver::DataType, data::Instance)
 
     model = vModel( solver )
 
     @variable(model, x[1:data.numberLevel1,1:data.numberTerminals], Bin) #affectation des terminaux au level1
     @variable(model, y[1:data.numberLevel1+data.numberLevel2,1:data.numberLevel1+data.numberLevel2], Bin) #affectation des level1 au level2
+    @variable(model, z[1:data.numberLevel1+data.numberLevel2], Bin) #Ouverture concentrator
+    @variable(model, minDist[1:data.numberLevel1+data.numberLevel2], Int) # Distance minimale pour chaque concentrateur de lvl1
 
     @addobjective( model, Min, sum(data.linkCosts[i,j]*x[i,j] for i in 1:data.numberLevel1, j in 1:data.numberTerminals) + sum(data.linkConcentratorsCosts[i,j]*y[i,j] for i in 1:data.numberLevel1, j in (data.numberLevel1+1):(data.numberLevel1+data.numberLevel2)) )
-    @addobjective( model, Max, sum(data.distancesConcentrators*y[i,j] for i in 1:data.numberLevel1, j in (data.numberLevel1+1):(data.numberLevel1+data.numberLevel2)))
+    @addobjective( model, Max, sum(minDist[i] for i in 1:data.numberLevel1))
+    M =10000
 
+    @constraint( model, [i=1:data.numberLevel1+data.numberLevel2, j=1:data.numberLevel1+data.numberLevel2], minDist[i] <= data.distancesConcentrators[i,j]+M(1-z[i]))
+
+    @constraint( model, [i=1:data.numberLevel1, j=1:data.numberTerminals], x[i,j]<=sum(y[j,k] for k in(data.numberLevel1+1):(data.numberLevel1+data.numberLevel2) ))
     @constraint( model, [j=1:data.numberTerminals], sum(x[i,j] for i in 1:data.numberLevel1) == 1 )
     @constraint( model, [i=1:data.numberLevel1], sum(x[i,j] for j in 1:data.numberTerminals) <= data.maximumNumberOfLinks )
 
-    @constraint( model, [i=1:data.numberLevel1], sum(y[i,j] for j in data.numberLevel1+1:data.numberLevel1+data.numberLevel2) == 1 )
+
+    @constraint( model, [i=1:data.numberLevel1, k=(data.numberLevel1+1):(data.numberLevel1+data.numberLevel2)], y[i,k] <= z[k])
+    @constraint( model, [i=1:data.numberLevel1], sum(y[i,j] for j in data.numberLevel1+1:data.numberLevel1+data.numberLevel2) <= 1 )
     @constraint( model, [j=data.numberLevel1+1:data.numberLevel1+data.numberLevel2], sum(y[i,j] for i in 1:data.numberLevel1) <= data.maximumNumberOfLinks )
     return model
 end
@@ -224,11 +232,11 @@ function main()
 
     println("Running the ϵ-constraint method with GLPK... \n")
     solver = GLPK.Optimizer
-    mod2UFLP = createModel2UFLP(solver, data)
-    set_silent(mod2UFLP)
+    modTSUFLP = createModelTSUFLP(solver, data)
+    set_silent(modTSUFLP)
 
     getTime = time()
-    vSolve(mod2UFLP, method=:epsilon, step = 1.0)
+    vSolve(modTSUFLP, method=:epsilon, step = 1.0)
     timevOPt = round(time()- getTime, digits=4)
 
 
@@ -236,12 +244,14 @@ function main()
     # Display the results
 
     println("\nDisplaying the results... \n")
-    YN = getY_N( mod2UFLP )
+    YN = getY_N( modTSUFLP )
     println("fname: $(fname[1:end-4])     tOpt: $(timevOPt) sec     #YN: $(length(YN)) points\n")
-    printX_E( mod2UFLP )
+    printX_E( modTSUFLP )
     println("\n...done!")
-
+    println(YN)
+    #for i in 1
     return nothing
+
 end
 
 # ==============================================================================
