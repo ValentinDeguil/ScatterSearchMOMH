@@ -76,7 +76,7 @@ function main(pathToInstance::String)
         for j in 1:n
             dist = (concentrators[i,1]-terminals[j,1])^2 + (concentrators[i,2]-terminals[j,2])^2
             dist = dist^0.5
-            distancesTerminalsConcentrators[i,j] = dist
+            distancesTerminalsConcentrators[i,j] = round(Int,dist)
         end
     end
 
@@ -94,7 +94,7 @@ function main(pathToInstance::String)
         for j in 1:m
             dist = (concentrators[i,1]-concentrators[j,1])^2 + (concentrators[i,2]-concentrators[j,2])^2
             dist = dist^0.5
-            distancesConcentrators[i,j] = dist
+            distancesConcentrators[i,j] = round(Int, dist)
         end
     end
 
@@ -110,8 +110,7 @@ function main(pathToInstance::String)
     linkConcentratorsCosts = zeros(Float32, m,m)
     #for i in 1:numberLevel1
     #    for j in (numberLevel1+1):m
-    #        randCost = rand(10:50)
-    #        linkConcentratorsCosts[i,j] = randCost
+    #        linkConcentratorsCosts[i,j] = distancesConcentrators[i,j]
     #    end
     #end
     linkConcentratorsCosts = copy(distancesConcentrators)
