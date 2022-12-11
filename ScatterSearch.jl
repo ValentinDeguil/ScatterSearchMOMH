@@ -84,8 +84,6 @@ function main(pathToInstance::String)
     linkCosts = zeros(Float32, m,n)
     for i in 1:m
         for j in 1:n
-            #randCost = rand(10:50)
-            #linkCosts[i,j] = randCost
             linkCosts[i,j] = distancesTerminalsConcentrators[i,j]
         end
     end
@@ -132,12 +130,6 @@ function main(pathToInstance::String)
     C1 = 0 #100
     C2 = 0 #200
 
-
-    #println("linkCosts = ", linkCosts)
-    #println("linkConcentratorsCosts = ", linkConcentratorsCosts)
-    #println("potentials = ", potentials)
-    #println("distancesConcentrators = ", distancesConcentrators)
-
     # we generate our first population of solution
     # half is good for the first objective the other is good for the second one
     archive = SkipList()
@@ -147,14 +139,11 @@ function main(pathToInstance::String)
 
     @time for i in 1:iterationGRASP
         baseSolution = generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
-        #println("coucou 1 ", baseSolution.linksTerminalLevel1)
         improvedSolution = TabuSearch(1, baseSolution, distancesConcentrators, linkConcentratorsCosts, linkCosts, numberLevel1, numberLevel2)
         improvedSolution.index = globalIndex
         globalIndex += 1
-        #println("coucou 1 ", improvedSolution.linksTerminalLevel1)
         addArchive(archive, [improvedSolution.valueObj1, improvedSolution.valueObj2])
         push!(solutionsGRASP, improvedSolution)
-        #generateSolutionObj2(1, linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, 100, 200)
     end
     @time for i in 1:iterationGRASP
         baseSolution = generateSolutionObj2(linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
@@ -164,10 +153,6 @@ function main(pathToInstance::String)
         addArchive(archive, [improvedSolution.valueObj1, improvedSolution.valueObj2])
         push!(solutionsGRASP, improvedSolution)
     end
-
-    #@time PathRelinking(TabSolution1[1], TabSolution2[1], n, m, Q, linkCosts, linkConcentratorsCosts, distancesConcentrators)
-
-    #@time TabuSearch(2,TabSolution1[1] ,C1, C2, distancesConcentrators,linkConcentratorsCosts,linkCosts,numberLevel1,numberLevel2)
 
     # building the initial refSets of size beta
     refSet1 = []
@@ -203,7 +188,7 @@ function main(pathToInstance::String)
         deleteat!(solutionsGRASP, indexBestObj2)
     end
 
-    # now, we build the second half of the refset by adding the most distant solutions to each refset
+    # now, we build the second half of the refsets by adding the most distant solutions to each refset
     for i in (beta/2)+1:beta
         maxDist = 0
         indexMaxDist = -1
@@ -219,11 +204,6 @@ function main(pathToInstance::String)
         push!(refSet1, copySolution(solutionsGRASP[indexMaxDist]))
         deleteat!(solutionsGRASP, indexMaxDist)
     end
-
-    #println("yooooo")
-    #for i in 1:beta
-    #    println(refSet1[i].index)
-    #end
 
     for i in (beta/2)+1:beta
         maxDist = 0
@@ -241,57 +221,39 @@ function main(pathToInstance::String)
         deleteat!(solutionsGRASP, indexMaxDist)
     end
 
-    #newSols = PathRelinking(refSet1[1], refSet2[1], n, m, Q, linkCosts, linkConcentratorsCosts, distancesConcentrators)
-    #for i in 1:length(newSols)
-    #    println("i = ", i)
-    #    println(newSols[i])
-    #end
-
-
+    # now we start the iterations to create the pareto front
 
     # here, we try to update refsets if a new sol is improving
+    # forbiddenPairs represents the pairs we already evaluated
     forbiddenPairs = []
     stop = false
     while !stop
-        println("jaj")
         stop = true
         poolSolutions = []
         # here, we process the pathrelinking between all new pairs from refset1 and refset2
         for a in 1:beta
             for b in 1:beta
-                #println("----------------")
-                #println("a = ", a)
-                #println("b = ", b)
-                #println("----------------")
                 S1 = refSet1[a]
                 S2 = refSet2[b]
                 indexS1 = S1.index
                 indexS2 = S2.index
-                #println("indexS1 = ", indexS1)
-                #println("indexS2 = ", indexS2)
                 pair = [min(indexS1, indexS2), max(indexS1, indexS2)]
-                #println("oui = ", pair)
                 if !(pair in forbiddenPairs)
-                    #println("paire inédite")
+                    # here, we call the path relinking to "link" one solution of each refset
                     newSols = PathRelinking(S1, S2, n, m, Q, linkCosts, linkConcentratorsCosts, distancesConcentrators)
-                    #println("sizenewSols = ", length(newSols))
                     for sol in 1:length(newSols)
+                        # then, each new solution is improved for each objective
                         addArchive(archive, [newSols[sol].valueObj1, newSols[sol].valueObj2])
                         improvedSolution1 = TabuSearch(1, newSols[sol], distancesConcentrators, linkConcentratorsCosts, linkCosts, numberLevel1, numberLevel2)
                         improvedSolution2 = TabuSearch(2, newSols[sol], distancesConcentrators, linkConcentratorsCosts, linkCosts, numberLevel1, numberLevel2)
                         improvedSolution1.index = globalIndex
                         improvedSolution2.index = (globalIndex + 1)
-                        #println("improvedSolution1 value1 = ", improvedSolution1.valueObj1)
-                        #println("improvedSolution1 value2 = ", improvedSolution1.valueObj2)
-                        #println("improvedSolution2 value1 = ", improvedSolution2.valueObj1)
-                        #println("improvedSolution2 value2 = ", improvedSolution2.valueObj2)
                         globalIndex += 2
                         # if we already have these solutions, we don't keep them
                         keep = true
                         for i in 1:length(poolSolutions)
                             if !isDifferent(improvedSolution1,poolSolutions[i])
                                 keep = false
-                                #println("yen a une en double 1")
                             end
                         end
                         if keep
@@ -302,7 +264,6 @@ function main(pathToInstance::String)
                         for i in 1:length(poolSolutions)
                             if !isDifferent(improvedSolution2,poolSolutions[i])
                                 keep = false
-                                #println("yen a une en double 2")
                             end
                         end
                         if keep
@@ -317,28 +278,18 @@ function main(pathToInstance::String)
 
         # we check if we have a dominated solution inside the refset 1
         for i in 1:length(poolSolutions)
-            #println("dominated ?")
+
             candidateSolution = poolSolutions[i]
-
-            #println("candidat")
-            #println("selectedLevel1 = ", candidateSolution.setSelectedLevel1)
-            #println("links = ", candidateSolution.linksTerminalLevel1)
-            #println("selectedLevel2 = ", candidateSolution.setSelectedLevel2)
-            #println("linksLevel1Level2 = ", candidateSolution.linksLevel1Level2)
-            #testcout = CalculCoutLink(linkCosts,candidateSolution.linksTerminalLevel1)
-            #println("testcout = ", testcout)
-
             candidateValueObj1 = candidateSolution.valueObj1
-            #println("candidateValueObj1 = ", candidateValueObj1)
-
             dominatedSols = []
+
             for j in 1:beta
                 if(candidateValueObj1 < refSet1[j].valueObj1)
                     push!(dominatedSols,j)
                 end
             end
+
             if length(dominatedSols) > 0
-                #println("solutions dominées refset1 = ", dominatedSols)
                 stop = false
                 distMin = Inf
                 indexMin = -1
@@ -349,31 +300,22 @@ function main(pathToInstance::String)
                         indexMin = dominatedSols[j]
                     end
                 end
-                #temp
-                #println("refSet1 avant")
-                #for i in 1:beta
-                #    println(refSet1[i].valueObj1)
-                #end
-                #println("on remplace ", indexMin)
-                refSet1[indexMin] = copySolution(candidateSolution)
-                #println("refSet1 après")
-                #for i in 1:beta
-                #    println(refSet1[i].valueObj1)
-                #end
             end
         end
 
         # we check if we have a dominated solution inside the refset 2
         for i in 1:length(poolSolutions)
+
             candidateSolution = poolSolutions[i]
             candidateValueObj2 = candidateSolution.valueObj2
-
             dominatedSols = []
+
             for j in 1:beta
                 if(candidateValueObj2 > refSet2[j].valueObj2)
                     push!(dominatedSols,j)
                 end
             end
+
             if length(dominatedSols) > 0
                 stop = false
                 distMin = Inf
@@ -395,4 +337,4 @@ function main(pathToInstance::String)
     plotResults(setOfSolutions(archive))
 end
 
-main("Instances/medium1.txt")
+main("Instances/small1.txt")
