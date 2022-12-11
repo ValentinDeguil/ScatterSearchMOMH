@@ -189,7 +189,7 @@ function createModelTSUFLP(solver::DataType, data::Instance)
     model = vModel( solver )
 
     @variable(model, x[1:data.numberLevel1,1:data.numberTerminals], Bin) #affectation des terminaux au level1
-    @variable(model, y[1:data.numberLevel1+data.numberLevel2,1:data.numberLevel1+data.numberLevel2], Bin) #affectation des level1 au level2
+    @variable(model, y[1:data.numberLevel1+data.numberLevel2,data.numberLevel1+1:data.numberLevel1+data.numberLevel2], Bin) #affectation des level1 au level2
     @variable(model, z[1:data.numberLevel1+data.numberLevel2], Bin) #Ouverture concentrator
     @variable(model, minDist[1:data.numberLevel1+data.numberLevel2], Int) # Distance minimale pour chaque concentrateur de lvl1
 
@@ -197,15 +197,15 @@ function createModelTSUFLP(solver::DataType, data::Instance)
     @addobjective( model, Max, sum(minDist[i] for i in 1:data.numberLevel1))
     M =10000
 
-    @constraint( model, [i=1:data.numberLevel1+data.numberLevel2, j=1:data.numberLevel1+data.numberLevel2], minDist[i] <= data.distancesConcentrators[i,j]+M(1-z[i]))
+    @constraint( model, [i=1:data.numberLevel1+data.numberLevel2, j=1:data.numberLevel1+data.numberLevel2, i!=j], minDist[i] <= data.distancesConcentrators[i,j]+M*(1-z[j]))
 
-    @constraint( model, [i=1:data.numberLevel1, j=1:data.numberTerminals], x[i,j]<=sum(y[j,k] for k in(data.numberLevel1+1):(data.numberLevel1+data.numberLevel2) ))
+    @constraint( model, [i=1:data.numberLevel1, j=1:data.numberTerminals], x[i,j]<=sum(y[i,k] for k in(data.numberLevel1+1):(data.numberLevel1+data.numberLevel2) ))
     @constraint( model, [j=1:data.numberTerminals], sum(x[i,j] for i in 1:data.numberLevel1) == 1 )
     @constraint( model, [i=1:data.numberLevel1], sum(x[i,j] for j in 1:data.numberTerminals) <= data.maximumNumberOfLinks )
 
 
     @constraint( model, [i=1:data.numberLevel1, k=(data.numberLevel1+1):(data.numberLevel1+data.numberLevel2)], y[i,k] <= z[k])
-    @constraint( model, [i=1:data.numberLevel1], sum(y[i,j] for j in data.numberLevel1+1:data.numberLevel1+data.numberLevel2) <= 1 )
+    @constraint( model, [i=1:data.numberLevel1], sum(y[i,k] for k in data.numberLevel1+1:data.numberLevel1+data.numberLevel2) <= 1 )
     @constraint( model, [j=data.numberLevel1+1:data.numberLevel1+data.numberLevel2], sum(y[i,j] for i in 1:data.numberLevel1) <= data.maximumNumberOfLinks )
     return model
 end
@@ -217,7 +217,7 @@ function main()
     # -------------------------------------------------------------------------
     # Load an instance (files are available in vOptLib)
 
-    fname = "Instances/small1.txt"   # filename of the instance to solve
+    fname = "Instances/verySmall1.txt"   # filename of the instance to solve
     data  = InstanceCreation(fname)
 
     # -------------------------------------------------------------------------
