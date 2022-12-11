@@ -41,19 +41,14 @@ function generateSolutionObj1(linkCosts::Matrix{Float32}, linkConcentratorsCosts
         end
 
         threshold = worst - alphaC1*(worst-best)
-        #println("best = ", best)
-        #println("worst = ", worst)
-        #println("threshold = ", threshold)
 
         RCL = []
         for i in 1:size(remainingLevel1,1)
             candidate = remainingLevel1[i]
-            #println("on teste si [", candidate, "] ", potentials[candidate], " <= ", threshold)
             if potentials[candidate] <= threshold
                 append!(RCL,candidate)
             end
         end
-        #println("donc RCL = ", RCL)
         newConcentrator = RCL[rand(1:size(RCL,1))]
         append!(setSelectedLevel1,newConcentrator)
         deleteat!(remainingLevel1, findall(x->x==newConcentrator,remainingLevel1))
@@ -222,19 +217,9 @@ function generateSolutionObj1(linkCosts::Matrix{Float32}, linkConcentratorsCosts
         valueObj2 += min
     end
 
-    #println("costOpeningLevel1 = ", costOpeningLevel1)
-    #println("costOpeningLevel2 = ", costOpeningLevel2)
-    #println("selectedLevel1 = ", setSelectedLevel1)
-    #println("links = ", linksTerminalLevel1)
-    #println("selectedLevel2 = ", setSelectedLevel2)
-    #println("linksLevel1Level2 = ", linksLevel1Level2)
-
     println("valueObj1 = ", valueObj1)
     println("valueObj2 = ", valueObj2)
 
     solutionReturn = solution(setSelectedLevel1,linksTerminalLevel1,setSelectedLevel2,linksLevel1Level2,valueObj1,valueObj2, nothing)
     return solutionReturn
-    #println((valueObj1))
-    #println(valueObj2)
-
 end

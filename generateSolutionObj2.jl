@@ -81,7 +81,6 @@ function generateSolutionObj2(linkCosts::Matrix{Float32}, linkConcentratorsCosts
     usedPorts[randLevel1] += 1
     valueObj1 += linkCosts[randLevel1, randTerminal]
 
-
     remainingTerminals = []
     for i in 1:n
         append!(remainingTerminals, i)
@@ -89,7 +88,6 @@ function generateSolutionObj2(linkCosts::Matrix{Float32}, linkConcentratorsCosts
     deleteat!(remainingTerminals, randTerminal)
 
     remainingLevel1 = copy(setSelectedLevel1)
-
     RCL = Vector{Vector{Int}}()
 
     for k in 2:n
@@ -217,14 +215,6 @@ function generateSolutionObj2(linkCosts::Matrix{Float32}, linkConcentratorsCosts
         end
     end
 
-    #allConcentrators = vcat(setSelectedLevel1, setSelectedLevel2)
-    #nbConcentrators = numberSelectedLevel1 + numberSelectedLevel2
-    #for i in 1:nbConcentrators
-    #    for j in 1:nbConcentrators
-    #        valueObj2 += distancesConcentrators[allConcentrators[i],allConcentrators[j]]
-    #    end
-    #end
-
     allConcentrators = vcat(setSelectedLevel1, setSelectedLevel2)
     nbConcentrators = numberSelectedLevel1 + numberSelectedLevel2
     for i in 1:nbConcentrators
@@ -244,16 +234,6 @@ function generateSolutionObj2(linkCosts::Matrix{Float32}, linkConcentratorsCosts
         valueObj2 += min
     end
 
-    #println("selectedLevel1 = ", setSelectedLevel1)
-    #println("links = ", linksTerminalLevel1)
-    #println("selectedLevel2 = ", setSelectedLevel2)
-    #println("linksLevel1Level2 = ", linksLevel1Level2)
-
-    #println("valueObj1 = ", valueObj1)
-    #println("valueObj2 = ", valueObj2)
-
-    println("valueObj1 = ", valueObj1)
-    println("valueObj2 = ", valueObj2)
     solutionReturn = solution(setSelectedLevel1,linksTerminalLevel1,setSelectedLevel2,linksLevel1Level2,valueObj1,valueObj2, nothing)
     return solutionReturn
 
