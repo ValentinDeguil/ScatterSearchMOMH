@@ -115,13 +115,13 @@ function copySolution(S)
     return solution(copy(S.setSelectedLevel1), copy(S.linksTerminalLevel1), copy(S.setSelectedLevel2), copy(S.linksLevel1Level2), S.valueObj1, S.valueObj2, S.index)
 end
 
-function plotResults(SolSkipList::Vector{Vector{Float64}})
-    xSkip,ySkip,strSkip = xy(SolSkipList,"SkipList")
-    #xOther,yOther,strOther = xy(SolSkipList,"All")
+function plotResults(SolSkipList::Vector{Vector{Float64}}, other::Vector{Vector{Float64}})
+    xSkip,ySkip,strSkip = xy(SolSkipList,"ScatterSearch")
+    xOther,yOther,strOther = xy(other,"vOptSolver")
 
-    x = xSkip#+xOther
-    y = ySkip#+yOther
-    str = strSkip#+strOther
+    x = vcat(xSkip,xOther)
+    y = vcat(ySkip,yOther)
+    str = vcat(strSkip,strOther)
     scatter(x,y,groups = str)
 end
 

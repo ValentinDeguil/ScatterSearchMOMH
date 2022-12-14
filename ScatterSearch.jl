@@ -1,9 +1,11 @@
 using Random
+using Metaheuristics.PerformanceIndicators: hypervolume
 include("generateSolutionObj1.jl")
 include("generateSolutionObj2.jl")
 include("TabuSearch.jl")
 include("PathRelinking.jl")
 include("SkipList.jl")
+include("VoptModel.jl")
 
 function loadInstance(fname)
     f=open(fname)
@@ -221,6 +223,12 @@ function main(pathToInstance::String)
         deleteat!(solutionsGRASP, indexMaxDist)
     end
 
+    test::Vector{Vector{Float64}} = []
+    for i in 1:beta
+        push!(test, [refSet1[i].valueObj1,refSet1[i].valueObj2])
+        push!(test, [refSet2[i].valueObj1,refSet2[i].valueObj2])
+    end
+
     # now we start the iterations to create the pareto front
 
     # here, we try to update refsets if a new sol is improving
@@ -334,7 +342,52 @@ function main(pathToInstance::String)
     end
     #affichageSkiplist(archive)
     println(nbrPoint(archive))
-    #plotResults(setOfSolutions(archive))
+    pts = setOfSolutions(archive)
+    println("temps epsilon")
+    @time YN = main()
+
+    for i in 1:length(pts)
+        pts[i][2] = -pts[i][2]
+    end
+    for i in 1:length(YN)
+        YN[i][2] = -YN[i][2]
+    end
+
+    xMax = 0
+    yMax = -Inf
+    for i in 1:length(pts)
+        if(pts[i][1] > xMax)
+            xMax = pts[i][1]
+        end
+    end
+
+    for i in 1:length(YN)
+        if(YN[i][1] > xMax)
+            xMax = YN[i][1]
+        end
+    end
+
+    for i in 1:length(pts)
+        if(pts[i][2] > yMax)
+            yMax = pts[i][2]
+        end
+    end
+    for i in 1:length(YN)
+        if(YN[i][2] > yMax)
+            yMax = YN[i][2]
+        end
+    end
+    refPoint = [xMax, yMax]
+    println("refPoint = ", refPoint)
+    hv1 = hypervolume(pts, refPoint)
+    println("hv scatter = ", hv1)
+    hv2 = hypervolume(YN, refPoint)
+    println("hv vopt = ", hv2)
+    println("nb sol vopt = ", length(YN))
+    println("nb sol scatter = ", length(pts))
+
+    plotResults(setOfSolutions(archive), YN)
+    #plotResults(test)
 end
 
-main("Instances/small1.txt")
+main("Instances/small5.txt")

@@ -9,7 +9,7 @@ VoptModel:
 
 # =============================================================================
 
-print("Loading and compiling vOptGeneric, JuMP, GLPK...")
+print("Loading and compiling vOptGeneric, JuMP, CPLEX...")
 using vOptGeneric, JuMP, CPLEX, Printf
 println(" done!")
 
@@ -202,7 +202,7 @@ function createModelTSUFLP(solver::DataType, data::Instance)
     #@addobjective( model, Max, minDist[1:data.numberLevel1+data.numberLevel2])
     M = data.M
 
-    @constraint( model, [i=1:data.numberLevel1+data.numberLevel2, j=1:data.numberLevel1+data.numberLevel2; i!=j], minDist[i] <= data.distancesConcentrators[i,j]+M*(1-z[j]*z[i]))
+    @constraint( model, [i=1:data.numberLevel1+data.numberLevel2, j=1:data.numberLevel1+data.numberLevel2; i!=j], minDist[i] <= data.distancesConcentrators[i,j]+M*(1-z[i])+M*(1-z[j]))
     @constraint( model, [i=1:data.numberLevel1+data.numberLevel2], minDist[i] <= M*z[i])
 
     @constraint( model, [i=1:data.numberLevel1, j=1:data.numberTerminals], x[i,j]<=sum(y[i,k] for k in(data.numberLevel1+1):(data.numberLevel1+data.numberLevel2) ))
@@ -225,7 +225,7 @@ function main()
     # -------------------------------------------------------------------------
     # Load an instance (files are available in vOptLib)
 
-    fname = "Instances/verySmall1.txt"   # filename of the instance to solve
+    fname = "Instances/small5.txt"   # filename of the instance to solve
     #fname = fileName
     data  = InstanceCreation(fname)
 
@@ -263,12 +263,11 @@ function main()
     println("\n...done!")
     println(YN)
     #for i in 1
-    return nothing
+    return YN
 
 end
 
 # ==============================================================================
-main()
 
 # x = [4,3,4,7,2,3,3,2,2,3,2,2,7,3,7,7,4,4,2,2]
 # y =[9,10,9,9]
