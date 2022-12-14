@@ -29,6 +29,7 @@ mutable struct Instance
     openingCostLevel1
     openingCostLevel2
     maximumNumberOfLinks::Int64
+    M::Int64
 end
 
 
@@ -155,9 +156,11 @@ function InstanceCreation(pathToInstance::String)
 
     C1 = 0 #100
     C2 = 0 #200
+    distancesConcentrators = round.(Int,distancesConcentrators)
+    M = maximum(distancesConcentrators)
 
 
-    return Instance(pathToInstance,numberLevel1,numberLevel2,n,round.(Int,distancesConcentrators),round.(Int,linkCosts),round.(Int,linkConcentratorsCosts),C1,C2,Q)
+    return Instance(pathToInstance,numberLevel1,numberLevel2,n,distancesConcentrators,round.(Int,linkCosts),round.(Int,linkConcentratorsCosts),C1,C2,Q,M)
 end
 
 
@@ -197,7 +200,7 @@ function createModelTSUFLP(solver::DataType, data::Instance)
     @addobjective( model, Min, sum(data.linkCosts[i,j]*x[i,j] for i in 1:data.numberLevel1, j in 1:data.numberTerminals) + sum(data.linkConcentratorsCosts[i,j]*y[i,j] for i in 1:data.numberLevel1, j in (data.numberLevel1+1):(data.numberLevel1+data.numberLevel2)) )
     @addobjective( model, Max, sum(minDist[i] for i in 1:data.numberLevel1+data.numberLevel2))
     #@addobjective( model, Max, minDist[1:data.numberLevel1+data.numberLevel2])
-    M =10000
+    M = data.M
 
     @constraint( model, [i=1:data.numberLevel1+data.numberLevel2, j=1:data.numberLevel1+data.numberLevel2; i!=j], minDist[i] <= data.distancesConcentrators[i,j]+M*(1-z[j]*z[i]))
     @constraint( model, [i=1:data.numberLevel1+data.numberLevel2], minDist[i] <= M*z[i])
