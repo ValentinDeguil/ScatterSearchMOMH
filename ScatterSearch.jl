@@ -352,68 +352,76 @@ end
 
 function Interface()
    println("################## ScatterSearch #####################")
-   println("")
-   print("Entrez le nom de l'instance (exemple: small1) : ")
-   instance = readline()
-   instance = "Instances/"* instance *".txt"
-   println("")
-   println("Démarrage de la résolution")
-   pts = main(instance)
-
-   print("Voulez vous comparer le scatter search à Vopt (Y/N): ")
-   choix = readline()
-   if(choix == "Y")
-       print("temps epsilon : ")
-       @time YN = solveExact(instance)
+   continuer = true
+   while(continuer)
        println("")
-       for i in 1:length(pts)
+       print("Entrez le nom de l'instance (exemple: small1) : ")
+       instance = readline()
+       instance = "Instances/"* instance *".txt"
+       println("")
+       println("Démarrage de la résolution")
+       pts = main(instance)
+       print("Voulez vous comparer le scatter search à Vopt (Y/N): ")
+       choix = readline()
+       if(choix == "Y")
+           print("temps epsilon : ")
+           @time YN = solveExact(instance)
+           println("")
+           for i in 1:length(pts)
            pts[i][2] = -pts[i][2]
-       end
-       for i in 1:length(YN)
+           end
+           for i in 1:length(YN)
            YN[i][2] = -YN[i][2]
-       end
-
-       xMax = 0
-       yMax = -Inf
-       for i in 1:length(pts)
-           if(pts[i][1] > xMax)
-               xMax = pts[i][1]
            end
-       end
-
-       for i in 1:length(YN)
-           if(YN[i][1] > xMax)
-               xMax = YN[i][1]
+           xMax = 0
+           yMax = -Inf
+           for i in 1:length(pts)
+              if(pts[i][1] > xMax)
+                  xMax = pts[i][1]
+              end
            end
-       end
-
-       for i in 1:length(pts)
-           if(pts[i][2] > yMax)
-               yMax = pts[i][2]
+           for i in 1:length(YN)
+              if(YN[i][1] > xMax)
+                  xMax = YN[i][1]
+              end
            end
-       end
-       for i in 1:length(YN)
-           if(YN[i][2] > yMax)
-               yMax = YN[i][2]
-           end
-       end
-       refPoint = [xMax, yMax]
-       println("refPoint = ", refPoint)
-       hv1 = hypervolume(pts, refPoint)
-       println("hv scatter = ", hv1)
-       hv2 = hypervolume(YN, refPoint)
-       println("hv vopt = ", hv2)
-       println("nb sol vopt = ", length(YN))
-       println("nb sol scatter = ", length(pts))
 
-       plotResults(setOfSolutions(archive), YN)
-       #plotResults(test)
-  else
-      plotResult(pts)
-  end
+           for i in 1:length(pts)
+               if(pts[i][2] > yMax)
+                   yMax = pts[i][2]
+               end
+           end
+           for i in 1:length(YN)
+               if(YN[i][2] > yMax)
+                   yMax = YN[i][2]
+               end
+           end
+           refPoint = [xMax, yMax]
+           println("refPoint = ", refPoint)
+           hv1 = hypervolume(pts, refPoint)
+           println("hv scatter = ", hv1)
+           hv2 = hypervolume(YN, refPoint)
+           println("hv vopt = ", hv2)
+           println("nb sol vopt = ", length(YN))
+           println("nb sol scatter = ", length(pts))
+
+           plotResults(pts, YN)
+           #plotResults(test)
+       else
+           plotResult(pts)
+       end
+       print("Voulez-vous tester une autre instance (Y/N)? ")
+       autre = readline()
+       println("")
+       if(autre == "N")
+           continuer = false
+       end
+   end
+
 
 
 
 end
+
 
 Interface()
