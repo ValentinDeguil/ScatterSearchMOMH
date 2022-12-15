@@ -122,15 +122,12 @@ function plotResults(SolSkipList::Vector{Vector{Float64}}, other::Vector{Vector{
     x = vcat(xSkip,xOther)
     y = vcat(ySkip,yOther)
     str = vcat(strSkip,strOther)
-    scatter(x,y,groups = str)
+    display(scatter(x,y,groups = str))
 end
 
 function plotResult(SolSkipList::Vector{Vector{Float64}})
-    xSkip,ySkip,strSkip = xy(SolSkipList,"ScatterSearch")
-    x = xSkip
-    y = ySkip
-    str = strSkip
-    scatter(x,y,groups = str)
+    x,y,str = xy(SolSkipList,"ScatterSearch")
+    display(scatter(x,y,groups = str))
 end
 
 

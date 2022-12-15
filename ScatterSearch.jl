@@ -406,7 +406,6 @@ function Interface()
            println("nb sol scatter = ", length(pts))
 
            plotResults(pts, YN)
-           #plotResults(test)
        else
            plotResult(pts)
        end
@@ -417,10 +416,6 @@ function Interface()
            continuer = false
        end
    end
-
-
-
-
 end
 
 
