@@ -125,6 +125,15 @@ function plotResults(SolSkipList::Vector{Vector{Float64}}, other::Vector{Vector{
     scatter(x,y,groups = str)
 end
 
+function plotResult(SolSkipList::Vector{Vector{Float64}})
+    xSkip,ySkip,strSkip = xy(SolSkipList,"ScatterSearch")
+    x = xSkip
+    y = ySkip
+    str = strSkip
+    scatter(x,y,groups = str)
+end
+
+
 function xy(setOfPoint::Vector{Vector{Float64}},str::String)
     x::Vector{Float64} = []
     y::Vector{Float64} = []

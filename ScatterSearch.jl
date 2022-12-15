@@ -1,6 +1,7 @@
 using Random
 using Metaheuristics.PerformanceIndicators: hypervolume
 using Plots
+include("VoptModel.jl")
 include("generateSolutionObj1.jl")
 include("generateSolutionObj2.jl")
 include("TabuSearch.jl")
@@ -357,14 +358,14 @@ function Interface()
    instance = "Instances/"* instance *".txt"
    println("")
    println("Démarrage de la résolution")
-   main(instance)
+   pts = main(instance)
 
    print("Voulez vous comparer le scatter search à Vopt (Y/N): ")
    choix = readline()
    if(choix == "Y")
-       include("VoptModel.jl")
-       println("temps epsilon")
+       print("temps epsilon : ")
        @time YN = solveExact(instance)
+       println("")
        for i in 1:length(pts)
            pts[i][2] = -pts[i][2]
        end
@@ -407,6 +408,8 @@ function Interface()
 
        plotResults(setOfSolutions(archive), YN)
        #plotResults(test)
+  else
+      plotResult(pts)
   end
 
 
