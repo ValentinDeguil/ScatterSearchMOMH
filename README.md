@@ -4,6 +4,8 @@ L'utilisation du code nécessite au préalable l'installation du packages Metahe
 
     Metaheuristics : `import Pkg; Pkg.add("Metaheuristics")`
 
-    
+## Exécution du scatter search    
+
+    include("ScatterSearch.jl")
 
 

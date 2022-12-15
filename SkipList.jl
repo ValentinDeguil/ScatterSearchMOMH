@@ -210,39 +210,3 @@ function setOfSolutions(head::point)::Vector{Vector{Float64}}
    deleteat!(setSol,length(setSol))
    return setSol
 end    
-
-#test = SkipList()
-#affichageSkiplist(test)
-#println("")
-#addArchive(test,[1.0,1.0])
-#affichageSkiplist(test)
-#println("")
-#addArchive(test,[2.0,2.0])
-#affichageSkiplist(test)
-#println("")
-#addArchive(test,[1.0,2.0])
-#affichageSkiplist(test)
-#println("")
-#addArchive(test,[3.0,3.0])
-#affichageSkiplist(test)
-#println("")
-#addArchive(test,[1.0,2.0])
-#affichageSkiplist(test)
-
-#=
-    if x[1] > (temp.est).valeur[1]
-            temp = temp.est
-        elseif  x[1] == temp.valeur[1]
-            if domine(x,temp.values)
-                suppre = temp
-                temp = temp.ouest
-                suppressionPoint(suppre)
-                add(temp,x)
-                filtrer = true
-            else if
-        end
-
-
-
-function remonter(point::point)
-=#

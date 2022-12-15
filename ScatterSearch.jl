@@ -6,7 +6,7 @@ include("generateSolutionObj2.jl")
 include("TabuSearch.jl")
 include("PathRelinking.jl")
 include("SkipList.jl")
-include("VoptModel.jl")
+
 
 function loadInstance(fname)
     f=open(fname)
@@ -344,51 +344,7 @@ function main(pathToInstance::String)
     #affichageSkiplist(archive)
     println(nbrPoint(archive))
     pts = setOfSolutions(archive)
-    println("temps epsilon")
-    @time YN = solveExact(pathToInstance)
-
-    for i in 1:length(pts)
-        pts[i][2] = -pts[i][2]
-    end
-    for i in 1:length(YN)
-        YN[i][2] = -YN[i][2]
-    end
-
-    xMax = 0
-    yMax = -Inf
-    for i in 1:length(pts)
-        if(pts[i][1] > xMax)
-            xMax = pts[i][1]
-        end
-    end
-
-    for i in 1:length(YN)
-        if(YN[i][1] > xMax)
-            xMax = YN[i][1]
-        end
-    end
-
-    for i in 1:length(pts)
-        if(pts[i][2] > yMax)
-            yMax = pts[i][2]
-        end
-    end
-    for i in 1:length(YN)
-        if(YN[i][2] > yMax)
-            yMax = YN[i][2]
-        end
-    end
-    refPoint = [xMax, yMax]
-    println("refPoint = ", refPoint)
-    hv1 = hypervolume(pts, refPoint)
-    println("hv scatter = ", hv1)
-    hv2 = hypervolume(YN, refPoint)
-    println("hv vopt = ", hv2)
-    println("nb sol vopt = ", length(YN))
-    println("nb sol scatter = ", length(pts))
-
-    plotResults(setOfSolutions(archive), YN)
-    #plotResults(test)
+    return pts
 end
 
 #main("Instances/small5.txt")
@@ -402,6 +358,59 @@ function Interface()
    println("")
    println("Démarrage de la résolution")
    main(instance)
+
+   print("Voulez vous comparer le scatter search à Vopt (Y/N): ")
+   choix = readline()
+   if(choix == "Y")
+       include("VoptModel.jl")
+       println("temps epsilon")
+       @time YN = solveExact(instance)
+       for i in 1:length(pts)
+           pts[i][2] = -pts[i][2]
+       end
+       for i in 1:length(YN)
+           YN[i][2] = -YN[i][2]
+       end
+
+       xMax = 0
+       yMax = -Inf
+       for i in 1:length(pts)
+           if(pts[i][1] > xMax)
+               xMax = pts[i][1]
+           end
+       end
+
+       for i in 1:length(YN)
+           if(YN[i][1] > xMax)
+               xMax = YN[i][1]
+           end
+       end
+
+       for i in 1:length(pts)
+           if(pts[i][2] > yMax)
+               yMax = pts[i][2]
+           end
+       end
+       for i in 1:length(YN)
+           if(YN[i][2] > yMax)
+               yMax = YN[i][2]
+           end
+       end
+       refPoint = [xMax, yMax]
+       println("refPoint = ", refPoint)
+       hv1 = hypervolume(pts, refPoint)
+       println("hv scatter = ", hv1)
+       hv2 = hypervolume(YN, refPoint)
+       println("hv vopt = ", hv2)
+       println("nb sol vopt = ", length(YN))
+       println("nb sol scatter = ", length(pts))
+
+       plotResults(setOfSolutions(archive), YN)
+       #plotResults(test)
+  end
+
+
+
 end
 
 Interface()
