@@ -1,5 +1,6 @@
 using Random
 using Metaheuristics.PerformanceIndicators: hypervolume
+using Plots
 include("generateSolutionObj1.jl")
 include("generateSolutionObj2.jl")
 include("TabuSearch.jl")
@@ -344,7 +345,7 @@ function main(pathToInstance::String)
     println(nbrPoint(archive))
     pts = setOfSolutions(archive)
     println("temps epsilon")
-    @time YN = main()
+    @time YN = solveExact(pathToInstance)
 
     for i in 1:length(pts)
         pts[i][2] = -pts[i][2]
@@ -390,4 +391,17 @@ function main(pathToInstance::String)
     #plotResults(test)
 end
 
-main("Instances/small5.txt")
+#main("Instances/small5.txt")
+
+function Interface()
+   println("################## ScatterSearch #####################")
+   println("")
+   print("Entrez le nom de l'instance (exemple: small1) : ")
+   instance = readline()
+   instance = "Instances/"* instance *".txt"
+   println("")
+   println("Démarrage de la résolution")
+   main(instance)
+end
+
+Interface()

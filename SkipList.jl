@@ -229,13 +229,6 @@ end
 #addArchive(test,[1.0,2.0])
 #affichageSkiplist(test)
 
-
-
-
-
-
-
-
 #=
     if x[1] > (temp.est).valeur[1]
             temp = temp.est

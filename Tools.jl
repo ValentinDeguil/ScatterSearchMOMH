@@ -1,4 +1,4 @@
-using Plots
+#using Plots
 
 mutable struct solution
     setSelectedLevel1::Vector{Int64}

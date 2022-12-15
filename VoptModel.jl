@@ -64,23 +64,23 @@ function loadInstance(fname::String)
 end
 
 function InstanceCreation(pathToInstance::String)
-    println("")
-    println("Instance of the problem")
+    #println("")
+    #println("Instance of the problem")
 
     # opening the instance
     m, n, p, r, concentrators, terminals = loadInstance(pathToInstance)
-    println("m = ", m, " (# concentrators)")
-    println("n = ", n, " (# terminals)")
-    println("p = ", p, " (# concentrators to open (level 1 & 2)")
-    println("r = ", r)
+    #println("m = ", m, " (# concentrators)")
+    #println("n = ", n, " (# terminals)")
+    #println("p = ", p, " (# concentrators to open (level 1 & 2)")
+    #println("r = ", r)
 
     # we want to divide the set of concentrators in two levels
     # here, we have 4/5 of level 1 and 1/5 of level 2 concentrators
     ratioLevelOne::Float32 = 4/5
     numberLevel1 = (Int)(m*ratioLevelOne)
     numberLevel2 = m - numberLevel1
-    println("numberLevel1 = ", numberLevel1, " (# level 1 concentrators)")
-    println("numberLevel2 = ", numberLevel2, " (# level 2 concentrators)")
+    #println("numberLevel1 = ", numberLevel1, " (# level 1 concentrators)")
+    #println("numberLevel2 = ", numberLevel2, " (# level 2 concentrators)")
 
     # for our constraints we chose the capacitated concentrators
     # so, we have a maximum of 7 links to each concentrator (level 1 & 2)
@@ -220,12 +220,12 @@ end
 
 
 # ==============================================================================
-function main()
+function solveExact(fileName)
 
     # -------------------------------------------------------------------------
     # Load an instance (files are available in vOptLib)
 
-    fname = "Instances/small5.txt"   # filename of the instance to solve
+    fname = fileName   # filename of the instance to solve
     #fname = fileName
     data  = InstanceCreation(fname)
 
@@ -241,7 +241,7 @@ function main()
     #println("nJ (services) : $(data.nJ)\n")
 
     # -------------------------------------------------------------------------
-    # compute YN with vOptGeneric using ϵ-constraint method and GLPK
+    # compute YN with vOptGeneric using ϵ-constraint method and CPLEX
 
     println("Running the ϵ-constraint method with GLPK... \n")
     solver = CPLEX.Optimizer
