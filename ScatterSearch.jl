@@ -141,6 +141,7 @@ function main(pathToInstance::String)
     iterationGRASP = 16
     globalIndex = 1
 
+    println("Génération solutions objectif 1")
     @time for i in 1:iterationGRASP
         baseSolution = generateSolutionObj1(linkCosts, linkConcentratorsCosts, potentials, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
         improvedSolution = TabuSearch(1, baseSolution, distancesConcentrators, linkConcentratorsCosts, linkCosts, numberLevel1, numberLevel2)
@@ -149,6 +150,7 @@ function main(pathToInstance::String)
         addArchive(archive, [improvedSolution.valueObj1, improvedSolution.valueObj2])
         push!(solutionsGRASP, improvedSolution)
     end
+    println("Génération solutions objectif 2")
     @time for i in 1:iterationGRASP
         baseSolution = generateSolutionObj2(linkCosts, linkConcentratorsCosts, distancesConcentrators, Q, numberLevel1, numberLevel2, n, C1, C2)
         improvedSolution = TabuSearch(2, baseSolution, distancesConcentrators, linkConcentratorsCosts, linkCosts, numberLevel1, numberLevel2)
@@ -237,6 +239,7 @@ function main(pathToInstance::String)
     # forbiddenPairs represents the pairs we already evaluated
     forbiddenPairs = []
     stop = false
+    println("Début des itérations de ScatterSearch")
     @time while !stop
         stop = true
         poolSolutions = []
